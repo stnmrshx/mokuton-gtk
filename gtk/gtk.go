@@ -7144,3 +7144,1758 @@ func (v *Table) GetDefaultColSpacing(child IWidget) uint {
 	return uint(C.gtk_table_get_default_col_spacing(TABLE(v)))
 }
 
+// GtkExpander
+type Expander struct {
+	Bin
+}
+
+func NewExpander(label string) *Expander {
+	ptr := C.CString(label)
+	defer cfree(ptr)
+	return &Expander{Bin{Container{Widget{C.gtk_expander_new(gstring(ptr))}}}}
+}
+
+func NewExpanderWithMnemonic(label string) *Expander {
+	ptr := C.CString(label)
+	defer cfree(ptr)
+	return &Expander{Bin{Container{Widget{C.gtk_expander_new_with_mnemonic(gstring(ptr))}}}}
+}
+
+func (v *Expander) SetExpanded(expanded bool) {
+	C.gtk_expander_set_expanded(
+		EXPANDER(v), 
+		gbool(expanded)
+	)
+}
+
+func (v *Expander) GetExpanded() bool {
+	return gobool(C.gtk_expander_get_expanded(EXPANDER(v)))
+}
+
+func (v *Expander) SetSpacing(spacing int) {
+	C.gtk_expander_set_spacing(
+		EXPANDER(v), 
+		gint(spacing)
+	)
+}
+
+func (v *Expander) GetSpacing() int {
+	return int(C.gtk_expander_get_spacing(EXPANDER(v)))
+}
+
+func (v *Expander) SetLabel(label string) {
+	ptr := C.CString(label)
+	defer cfree(ptr)
+	C.gtk_expander_set_label(
+		EXPANDER(v), 
+		gstring(ptr)
+	)
+}
+
+func (v *Expander) GetLabel() string {
+	return gostring(C.gtk_expander_get_label(EXPANDER(v)))
+}
+
+func (v *Expander) SetUseUnderline(setting bool) {
+	C.gtk_expander_set_use_underline(
+		EXPANDER(v), 
+		gbool(setting)
+	)
+}
+
+func (v *Expander) GetUseUnderline() bool {
+	return gobool(C.gtk_expander_get_use_underline(EXPANDER(v)))
+}
+
+func (v *Expander) SetUseMarkup(setting bool) {
+	C.gtk_expander_set_use_markup(
+		EXPANDER(v), 
+		gbool(setting)
+	)
+}
+
+func (v *Expander) GetUseMarkup() bool {
+	return gobool(C.gtk_expander_get_use_markup(EXPANDER(v)))
+}
+
+func (v *Expander) SetLabelWidget(label_widget ILabel) {
+	C.gtk_expander_set_label_widget(
+		EXPANDER(v), 
+		ToNative(label_widget)
+	)
+}
+
+func (v *Expander) GetLabelWidget() ILabel {
+	return &Label{Widget{C.gtk_expander_get_label_widget(EXPANDER(v))}}
+}
+
+// gtkFrame
+//-----------------------------------------------------------------------
+type ShadowType int
+
+const (
+	SHADOW_NONE       ShadowType = 0
+	SHADOW_IN         ShadowType = 1
+	SHADOW_OUT        ShadowType = 2
+	SHADOW_ETCHED_IN  ShadowType = 3
+	SHADOW_ETCHED_OUT ShadowType = 4
+)
+
+type Frame struct {
+	Bin
+}
+
+func NewFrame(label string) *Frame {
+	ptr := C.CString(label)
+	defer cfree(ptr)
+	return &Frame{Bin{Container{Widget{C.gtk_frame_new(gstring(ptr))}}}}
+}
+
+func (v *Frame) SetLabel(label string) {
+	ptr := C.CString(label)
+	defer cfree(ptr)
+	C.gtk_frame_set_label(
+		FRAME(v), 
+		gstring(ptr)
+	)
+}
+
+func (v *Frame) SetLabelWidget(label_widget ILabel) {
+	C.gtk_frame_set_label_widget(
+		FRAME(v), 
+		ToNative(label_widget)
+	)
+}
+
+func (v *Frame) SetLabelAlign(xalign, yalign float64) {
+	C.gtk_frame_set_label_align(
+		FRAME(v), 
+		C.gfloat(xalign), 
+		C.gfloat(yalign)
+	)
+}
+
+func (v *Frame) SetShadowType(shadow_type ShadowType) {
+	C.gtk_frame_set_shadow_type(
+		FRAME(v), 
+		C.GtkShadowType(shadow_type)
+	)
+}
+
+func (v *Frame) GetLabel() string {
+	return gostring(C.gtk_frame_get_label(FRAME(v)))
+}
+
+func (v *Frame) GetLabelAlign() (xalign, yalign float64) {
+	var xalign_, yalign_ C.gfloat
+	C.gtk_frame_get_label_align(
+		FRAME(v), 
+		&xalign_, 
+		&yalign_
+	)
+	return float64(xalign_), float64(yalign_)
+}
+
+func (v *Frame) GetLabelWidget() ILabel {
+	return &Label{Widget{C.gtk_frame_get_label_widget(FRAME(v))}}
+}
+
+func (v *Frame) GetShadowType() ShadowType {
+	return ShadowType(C.gtk_frame_get_shadow_type(FRAME(v)))
+}
+
+// gtkHSeparator
+type HSeparator struct {
+	Separator
+}
+
+func NewHSeparator() *HSeparator {
+	return &HSeparator{Separator{Widget{C.gtk_hseparator_new()}}}
+}
+
+// gtkVSeparator
+type VSeparator struct {
+	Separator
+}
+
+func NewVSeparator() *VSeparator {
+	return &VSeparator{Separator{Widget{C.gtk_vseparator_new()}}}
+}
+
+// gtkScrolledWindow
+type PolicyType int
+
+const (
+	POLICY_ALWAYS    = 0
+	POLICY_AUTOMATIC = 1
+	POLICY_NEVER     = 2
+)
+
+type CornerType int
+
+const (
+	CORNER_TOP_LEFT     CornerType = 0
+	CORNER_BOTTOM_LEFT  CornerType = 1
+	CORNER_TOP_RIGHT    CornerType = 2
+	CORNER_BOTTOM_RIGHT CornerType = 3
+)
+
+type ScrolledWindow struct {
+	Bin
+}
+
+func NewScrolledWindow(hadjustment *Adjustment, vadjustment *Adjustment) *ScrolledWindow {
+	var had, vad *C.GtkAdjustment
+	if hadjustment != nil {
+		had = hadjustment.GAdjustment
+	}
+	if vadjustment != nil {
+		vad = vadjustment.GAdjustment
+	}
+	return &ScrolledWindow{Bin{Container{Widget{C.gtk_scrolled_window_new(had, vad)}}}}
+}
+
+func (v *ScrolledWindow) GetHAdjustment() *Adjustment {
+	return &Adjustment{C.gtk_scrolled_window_get_hadjustment(SCROLLED_WINDOW(v))}
+}
+
+func (v *ScrolledWindow) GetVAdjustment() *Adjustment {
+	return &Adjustment{C.gtk_scrolled_window_get_vadjustment(SCROLLED_WINDOW(v))}
+}
+
+func (v *ScrolledWindow) SetPolicy(hscrollbar_policy PolicyType, vscrollbar_policy PolicyType) {
+	C.gtk_scrolled_window_set_policy(
+		SCROLLED_WINDOW(v), 
+		C.GtkPolicyType(hscrollbar_policy), 
+		C.GtkPolicyType(vscrollbar_policy)
+	)
+}
+
+func (v *ScrolledWindow) AddWithViewPort(w IWidget) {
+	C.gtk_scrolled_window_add_with_viewport(
+		SCROLLED_WINDOW(v), 
+		ToNative(w)
+	)
+}
+
+func (v *ScrolledWindow) SetPlacement(window_placement CornerType) {
+	C.gtk_scrolled_window_set_placement(
+		SCROLLED_WINDOW(v), 
+		C.GtkCornerType(window_placement)
+	)
+}
+
+func (v *ScrolledWindow) UnsetPlacement() {
+	C.gtk_scrolled_window_unset_placement(SCROLLED_WINDOW(v))
+}
+
+func (v *ScrolledWindow) SetShadowType(typ ShadowType) {
+	C.gtk_scrolled_window_set_shadow_type(
+		SCROLLED_WINDOW(v), 
+		C.GtkShadowType(typ)
+	)
+}
+
+func (v *ScrolledWindow) SetHAdjustment(hadjustment *Adjustment) {
+	C.gtk_scrolled_window_set_hadjustment(
+		SCROLLED_WINDOW(v), 
+		hadjustment.GAdjustment
+	)
+}
+
+func (v *ScrolledWindow) SetVAdjustment(vadjustment *Adjustment) {
+	C.gtk_scrolled_window_set_vadjustment(
+		SCROLLED_WINDOW(v), 
+		vadjustment.GAdjustment
+	)
+}
+
+func (v *ScrolledWindow) GetPlacement() CornerType {
+	return CornerType(C.gtk_scrolled_window_get_placement(SCROLLED_WINDOW(v)))
+}
+
+func (v *ScrolledWindow) GetPolicy(hscrollbar_policy *PolicyType, vscrollbar_policy *PolicyType) {
+	var chscrollbar_policy, cvscrollbar_policy C.GtkPolicyType
+	C.gtk_scrolled_window_get_policy(
+		SCROLLED_WINDOW(v), 
+		&chscrollbar_policy, 
+		&cvscrollbar_policy
+	)
+	*hscrollbar_policy = PolicyType(chscrollbar_policy)
+	*vscrollbar_policy = PolicyType(cvscrollbar_policy)
+}
+
+func (v *ScrolledWindow) GetShadowType() ShadowType {
+	return ShadowType(C.gtk_scrolled_window_get_shadow_type(SCROLLED_WINDOW(v)))
+}
+
+// gtkPrintOperation
+type PrintOperation struct {
+	GPrintOperation *C.GtkPrintOperation
+}
+
+type PrintOperationResult int
+
+const (
+	PRINT_OPERATION_RESULT_ERROR       PrintOperationResult = 0
+	PRINT_OPERATION_RESULT_APPLY       PrintOperationResult = 1
+	PRINT_OPERATION_RESULT_CANCEL      PrintOperationResult = 2
+	PRINT_OPERATION_RESULT_IN_PROGRESS PrintOperationResult = 3
+)
+
+type PrintOperationAction int
+
+const (
+	PRINT_OPERATION_ACTION_PRINT_DIALOG PrintOperationAction = 0
+	PRINT_OPERATION_ACTION_PRINT        PrintOperationAction = 1
+	PRINT_OPERATION_ACTION_PREVIEW      PrintOperationAction = 2
+	PRINT_OPERATION_ACTION_EXPOR        PrintOperationAction = 3
+)
+
+func NewPrintOperation() *PrintOperation {
+	return &PrintOperation{C.gtk_print_operation_new()}
+}
+
+func (v *PrintOperation) Run(action PrintOperationAction, parent *Window) (result PrintOperationResult, err error) {
+	var gerror *C.GError
+	ret := PrintOperationResult(
+		C.gtk_print_operation_run(
+			v.GPrintOperation,
+			C.GtkPrintOperationAction(action),
+			C.toGWindow(parent.GWidget),
+			&gerror)
+		)
+	if gerror != nil {
+		err = glib.ErrorFromNative(unsafe.Pointer(gerror))
+	}
+	return PrintOperationResult(ret), err
+}
+
+func (v *PrintOperation) Cancel() {
+	C.gtk_print_operation_cancel(v.GPrintOperation)
+}
+
+func (v *PrintOperation) IsFinished() bool {
+	return gobool(C.gtk_print_operation_is_finished(v.GPrintOperation))
+}
+
+func (v *PrintOperation) Connect(s string, f interface{}, datas ...interface{}) int {
+	return glib.ObjectFromNative(unsafe.Pointer(v.GPrintOperation)).Connect(s, f, datas...)
+}
+
+// gtkPrintContext
+type PrintContext struct {
+	GPrintContext *C.GtkPrintContext
+}
+
+func (v *PrintContext) GetCairoContext() *C.cairo_t {
+	return C.gtk_print_context_get_cairo_context(v.GPrintContext)
+}
+
+func (v *PrintContext) SetCairoContext(cairo *C.cairo_t, dpi_x float64, dpi_y float64) {
+	C.gtk_print_context_set_cairo_context(
+		v.GPrintContext, 
+		cairo, 
+		C.double(dpi_x), 
+		C.double(dpi_y)
+	)
+}
+
+// gtkAdjustment
+type Adjustment struct {
+	GAdjustment *C.GtkAdjustment
+}
+
+func NewAdjustment(value, lower, upper, step_increment, page_increment, page_size float64) *Adjustment {
+	return &Adjustment{C.toGAdjustment(C.gtk_adjustment_new(gdouble(value), gdouble(lower), gdouble(upper), gdouble(step_increment), gdouble(page_increment), gdouble(page_size)))}
+}
+
+func (v *Adjustment) GetValue() float64 {
+	return float64(C.gtk_adjustment_get_value(v.GAdjustment))
+}
+
+func (v *Adjustment) SetValue(value float64) {
+	C.gtk_adjustment_set_value(
+		v.GAdjustment, 
+		gdouble(value)
+	)
+}
+
+func (v *Adjustment) Configure(value, lower, upper, step_increment, page_increment, page_size float64) {
+	panic_if_version_older(2, 14, 0, "gtk_adjustment_configure()")
+	C._gtk_adjustment_configure(
+		v.GAdjustment, 
+		gdouble(value), 
+		gdouble(lower), 
+		gdouble(upper),
+		gdouble(step_increment), 
+		gdouble(page_increment), 
+		gdouble(page_size)
+	)
+}
+
+func (v *Adjustment) GetLower() float64 {
+	panic_if_version_older(2, 14, 0, "gtk_adjustment_get_lower()")
+	return float64(C._gtk_adjustment_get_lower(v.GAdjustment))
+}
+
+func (v *Adjustment) GetPageIncrement() float64 {
+	panic_if_version_older(2, 14, 0, "gtk_adjustment_get_page_increment()")
+	return float64(C._gtk_adjustment_get_page_increment(v.GAdjustment))
+}
+
+func (v *Adjustment) GetPageSize() float64 {
+	panic_if_version_older(2, 14, 0, "gtk_adjustment_get_page_size()")
+	return float64(C._gtk_adjustment_get_page_size(v.GAdjustment))
+}
+
+func (v *Adjustment) GetStepIncrement() float64 {
+	panic_if_version_older(2, 14, 0, "gtk_adjustment_get_step_increment()")
+	return float64(C._gtk_adjustment_get_step_increment(v.GAdjustment))
+}
+
+func (v *Adjustment) GetUpper() float64 {
+	panic_if_version_older(2, 14, 0, "gtk_adjustment_get_upper()")
+	return float64(C._gtk_adjustment_get_upper(v.GAdjustment))
+}
+
+func (v *Adjustment) SetLower(lower float64) {
+	panic_if_version_older(2, 14, 0, "gtk_adjustment_set_lower()")
+	C._gtk_adjustment_set_lower(
+		v.GAdjustment, 
+		gdouble(lower)
+	)
+}
+
+func (v *Adjustment) SetPageIncrement(page_increment float64) {
+	panic_if_version_older(2, 14, 0, "gtk_adjustment_set_page_increment()")
+	C._gtk_adjustment_set_page_increment(
+		v.GAdjustment, 
+		gdouble(page_increment)
+	)
+}
+
+func (v *Adjustment) SetPageSize(page_size float64) {
+	panic_if_version_older(2, 14, 0, "gtk_adjustment_set_page_size()")
+	C._gtk_adjustment_set_page_size(
+		v.GAdjustment, 
+		gdouble(page_size)
+	)
+}
+
+func (v *Adjustment) SetStepIncrement(step_increment float64) {
+	panic_if_version_older(2, 14, 0, "gtk_adjustment_set_step_increment()")
+	C._gtk_adjustment_set_step_increment(
+		v.GAdjustment, 
+		gdouble(step_increment)
+	)
+}
+
+func (v *Adjustment) SetUpper(upper float64) {
+	panic_if_version_older(2, 14, 0, "gtk_adjustment_set_upper()")
+	C._gtk_adjustment_set_upper(
+		v.GAdjustment, 
+		gdouble(upper)
+	)
+}
+
+// gtkDrawingArea
+type DrawingArea struct {
+	Widget
+}
+
+func NewDrawingArea() *DrawingArea {
+	return &DrawingArea{Widget{C.gtk_drawing_area_new()}}
+}
+
+func (v *DrawingArea) GetSizeRequest(width, height int) {
+	deprecated_since(2, 0, 0, "gtk_drawing_area_size()")
+	C.gtk_drawing_area_size(
+		DRAWING_AREA(v), 
+		gint(width), 
+		gint(height)
+	)
+}
+
+// gtkEventBox
+type EventBox struct {
+	Bin
+}
+
+func NewEventBox() *EventBox {
+	return &EventBox{Bin{Container{Widget{C.gtk_event_box_new()}}}}
+}
+
+// gtkSizeGroup
+type SizeGroupMode int
+
+const (
+	SIZE_GROUP_NONE       SizeGroupMode = 0
+	SIZE_GROUP_HORIZONTAL SizeGroupMode = 1
+	SIZE_GROUP_VERTICAL   SizeGroupMode = 2
+	SIZE_GROUP_BOTH       SizeGroupMode = 3
+)
+
+type SizeGroup struct {
+	GSizeGroup *C.GtkSizeGroup
+}
+
+func NewSizeGroup(mode SizeGroupMode) *SizeGroup {
+	return &SizeGroup{C.gtk_size_group_new(C.GtkSizeGroupMode(mode))}
+}
+
+func (v *SizeGroup) SetMode(mode SizeGroupMode) {
+	C.gtk_size_group_set_mode(
+		v.GSizeGroup, 
+		C.GtkSizeGroupMode(mode)
+	)
+}
+
+func (v *SizeGroup) GetMode() SizeGroupMode {
+	return SizeGroupMode(C.gtk_size_group_get_mode(v.GSizeGroup))
+}
+
+func (v *SizeGroup) SetIgnoreHidden(ignore_hidden bool) {
+	C.gtk_size_group_set_ignore_hidden(
+		v.GSizeGroup, 
+		gbool(ignore_hidden)
+	)
+}
+
+func (v *SizeGroup) GetIgnoreHidden() bool {
+	return gobool(C.gtk_size_group_get_ignore_hidden(v.GSizeGroup))
+}
+
+func (v *SizeGroup) AddWidget(w IWidget) {
+	C.gtk_size_group_add_widget(
+		v.GSizeGroup, 
+		ToNative(w)
+	)
+}
+
+func (v *SizeGroup) RemoveWidget(w IWidget) {
+	C.gtk_size_group_remove_widget(
+		v.GSizeGroup, 
+		ToNative(w)
+	)
+}
+
+func (v *SizeGroup) GetWidgets() *glib.SList {
+	return glib.SListFromNative(unsafe.Pointer(C.gtk_size_group_get_widgets(v.GSizeGroup)))
+}
+
+// gtkTooltip
+type Tooltip struct {
+	GTooltip *C.GtkTooltip
+}
+
+func (v *Tooltip) SetMarkup(markup string) {
+	ptr := C.CString(markup)
+	defer cfree(ptr)
+	C.gtk_tooltip_set_markup(
+		v.GTooltip, 
+		gstring(ptr)
+	)
+}
+
+func (v *Tooltip) SetText(text string) {
+	ptr := C.CString(text)
+	defer cfree(ptr)
+	C.gtk_tooltip_set_text(
+		v.GTooltip, 
+		gstring(ptr)
+	)
+}
+
+func (v *Tooltip) SetIcon(pixbuf *gdkpixbuf.Pixbuf) {
+	C.gtk_tooltip_set_icon(
+		v.GTooltip, 
+		pixbuf.GPixbuf
+	)
+}
+
+func (v *Tooltip) SetIconFromStock(stock_id string, size IconSize) {
+	ptr := C.CString(stock_id)
+	defer cfree(ptr)
+	C.gtk_tooltip_set_icon_from_stock(
+		v.GTooltip, 
+		gstring(ptr), 
+		C.GtkIconSize(size)
+	)
+}
+
+func (v *Tooltip) SetIconFromIconName(icon_name string, size IconSize) {
+	ptr := C.CString(icon_name)
+	defer cfree(ptr)
+	C.gtk_tooltip_set_icon_from_icon_name(
+		v.GTooltip, 
+		gstring(ptr), 
+		C.GtkIconSize(size)
+	)
+}
+
+func TooltipFromNative(l unsafe.Pointer) *Tooltip {
+	return &Tooltip{(*C.GtkTooltip)(l)}
+}
+
+// gtkViewport
+type Viewport struct {
+	Bin
+}
+
+func NewViewport(ha, va *Adjustment) *Viewport {
+	var had, vad *C.GtkAdjustment
+	if ha != nil {
+		had = ha.GAdjustment
+	}
+	if va != nil {
+		vad = va.GAdjustment
+	}
+	return &Viewport{Bin{Container{Widget{C.gtk_viewport_new(had, vad)}}}}
+}
+
+func (v *Viewport) GetHAdjustment() *Adjustment {
+	return &Adjustment{C.gtk_viewport_get_hadjustment(VIEWPORT(v))}
+}
+
+func (v *Viewport) GetVAdjustment() *Adjustment {
+	return &Adjustment{C.gtk_viewport_get_vadjustment(VIEWPORT(v))}
+}
+
+func (v *Viewport) SetHAdjustment(ha *Adjustment) {
+	C.gtk_viewport_set_hadjustment(
+		VIEWPORT(v), 
+		ADJUSTMENT(ha)
+	)
+}
+
+func (v *Viewport) SetVAdjustment(va *Adjustment) {
+	C.gtk_viewport_set_vadjustment(
+		VIEWPORT(v), 
+		ADJUSTMENT(va)
+	)
+}
+
+func (v *Viewport) GetShadowType() ShadowType {
+	return ShadowType(C.gtk_viewport_get_shadow_type(VIEWPORT(v)))
+}
+
+func (v *Viewport) SetShadowType(typ ShadowType) {
+	C.gtk_viewport_set_shadow_type(
+		VIEWPORT(v), 
+		C.GtkShadowType(typ)
+	)
+}
+
+func (v *Viewport) GetBinWindow() *Window {
+	panic_if_version_older_auto(2, 20, 0)
+	return &Window{Bin{Container{Widget{C.toGWidget(unsafe.Pointer(C._gtk_viewport_get_bin_window(VIEWPORT(v))))}}}}
+}
+
+func (v *Viewport) GetViewWindow() *Window {
+	panic_if_version_older_auto(2, 22, 0)
+	return &Window{Bin{Container{Widget{C.toGWidget(unsafe.Pointer(C._gtk_viewport_get_view_window(VIEWPORT(v))))}}}}
+}
+
+// gtkAccessible
+type Accessible struct {
+	glib.GObject
+}
+
+func (v *Accessible) ConnectWidgetDestroyed() {
+	C.gtk_accessible_connect_widget_destroyed(ACCESSIBLE(v))
+}
+
+func (v *Accessible) SetWidget(w IWidget) {
+	panic_if_version_older_auto(2, 22, 0)
+	C._gtk_accessible_set_widget(
+		ACCESSIBLE(v), 
+		ToNative(w)
+	)
+}
+
+func (v *Accessible) GetWidget() *Widget {
+	panic_if_version_older_auto(2, 22, 0)
+	return &Widget{C._gtk_accessible_get_widget(ACCESSIBLE(v))}
+}
+
+// gtkBin
+type Bin struct {
+	Container
+}
+
+func (v *Bin) GetChild() *Widget {
+	return &Widget{C.gtk_bin_get_child(BIN(v))}
+}
+
+// gtkBox
+type PackType int
+
+const (
+	PACK_START PackType = 0
+	PACK_END   PackType = 1
+)
+
+type IBox interface {
+	IContainer
+	PackStart(child IWidget, expand bool, fill bool, padding uint)
+	PackEnd(child IWidget, expand bool, fill bool, padding uint)
+}
+
+type Box struct {
+	Container
+}
+
+func (v *Box) PackStart(child IWidget, expand bool, fill bool, padding uint) {
+	C.gtk_box_pack_start(
+		BOX(v), 
+		ToNative(child), 
+		gbool(expand),
+		gbool(fill), 
+		guint(padding)
+	)
+}
+
+func (v *Box) PackEnd(child IWidget, expand bool, fill bool, padding uint) {
+	C.gtk_box_pack_end(
+		BOX(v), 
+		ToNative(child), 
+		gbool(expand), 
+		gbool(fill), 
+		guint(padding)
+	)
+}
+
+func (v *Box) PackStartDefaults(child IWidget) {
+	deprecated_since(2, 14, 0, "gtk_box_pack_start_defaults()")
+	C.gtk_box_pack_start_defaults(
+		BOX(v), 
+		ToNative(child)
+	)
+}
+
+func (v *Box) PackEndDefaults(child IWidget) {
+	deprecated_since(2, 14, 0, "gtk_box_pack_end_defaults()")
+	C.gtk_box_pack_end_defaults(
+		BOX(v), 
+		ToNative(child)
+	)
+}
+
+func (v *Box) GetHomogeneous() bool {
+	return gobool(C.gtk_box_get_homogeneous(BOX(v)))
+}
+
+func (v *Box) SetHomogeneous(homogeneous bool) {
+	C.gtk_box_set_homogeneous(
+		BOX(v), 
+		gbool(homogeneous)
+	)
+}
+
+func (v *Box) GetSpacing() int {
+	return int(C.gtk_box_get_spacing(BOX(v)))
+}
+
+func (v *Box) SetSpacing(spacing int) {
+	C.gtk_box_set_spacing(
+		BOX(v), 
+		gint(spacing)
+	)
+}
+
+func (v *Box) ReorderChild(child IWidget, position PackType) {
+	C.gtk_box_reorder_child(
+		BOX(v), 
+		ToNative(child), 
+		C.gint(position)
+	)
+}
+
+func (v *Box) QueryChildPacking(child IWidget, expand *bool, fill *bool, padding *uint, pack_type *PackType) {
+	var cexpand, cfill C.gboolean
+	var cpadding C.guint
+	var cpack_type C.GtkPackType
+	C.gtk_box_query_child_packing(
+		BOX(v), 
+		ToNative(child), 
+		&cexpand, 
+		&cfill, 
+		&cpadding, 
+		&cpack_type
+	)
+	*expand = gobool(cexpand)
+	*fill = gobool(cfill)
+	*padding = uint(cpadding)
+	*pack_type = PackType(cpack_type)
+}
+
+func (v *Box) SetChildPacking(child IWidget, expand, fill bool, padding uint, pack_type PackType) {
+	C.gtk_box_set_child_packing(
+		BOX(v), 
+		ToNative(child), 
+		gbool(expand), 
+		gbool(fill), 
+		guint(padding), 
+		C.GtkPackType(pack_type)
+	)
+}
+
+// gtkContainer
+type IContainer interface {
+	IWidget
+	Add(w IWidget)
+}
+
+type Container struct {
+	Widget
+}
+
+func (v *Container) Add(w IWidget) {
+	C.gtk_container_add(
+		CONTAINER(v), 
+		ToNative(w)
+	)
+}
+
+func (v *Container) Remove(w IWidget) {
+	C.gtk_container_remove(
+		CONTAINER(v), 
+		ToNative(w)
+	)
+}
+
+func (v *Container) CheckResize() {
+	C.gtk_container_check_resize(CONTAINER(v))
+}
+
+func (v *Container) GetChildren() *glib.List {
+	return glib.ListFromNative(unsafe.Pointer(C.gtk_container_get_children(CONTAINER(v))))
+}
+
+func (v *Container) GetBorderWidth() uint {
+	return uint(C.gtk_container_get_border_width(CONTAINER(v)))
+}
+
+func (v *Container) SetBorderWidth(border_width uint) {
+	C.gtk_container_set_border_width(CONTAINER(v), guint(border_width))
+}
+
+// gtkItem
+type Item struct {
+	Bin
+}
+
+func (v *Item) Select() {
+	deprecated_since(2, 22, 0, "gtk_item_select()")
+	C.gtk_item_select(ITEM(v))
+}
+
+func (v *Item) Deselect() {
+	deprecated_since(2, 22, 0, "gtk_item_deselect()")
+	C.gtk_item_deselect(ITEM(v))
+}
+
+func (v *Item) Toggle() {
+	deprecated_since(2, 22, 0, "gtk_item_select()")
+	C.gtk_item_toggle(ITEM(v))
+}
+
+// gtkObject
+type Object struct {
+	glib.GObject
+}
+
+// gtkPaned
+type IPaned interface {
+	IContainer
+	Add1(child IWidget)
+	Add2(child IWidget)
+	Pack1(child IWidget, expand bool, fill bool)
+	Pack2(child IWidget, expand bool, fill bool)
+}
+
+type Paned struct {
+	Container
+}
+
+func (v *Paned) Add1(child IWidget) {
+	C.gtk_paned_add1(
+		PANED(v), 
+		ToNative(child)
+	)
+}
+
+func (v *Paned) Add2(child IWidget) {
+	C.gtk_paned_add2(
+		PANED(v), 
+		ToNative(child)
+	)
+}
+
+func (v *Paned) Pack1(child IWidget, resize bool, shrink bool) {
+	C.gtk_paned_pack1(
+		PANED(v), 
+		ToNative(child), 
+		gbool(resize), 
+		gbool(shrink)
+	)
+}
+
+func (v *Paned) Pack2(child IWidget, resize bool, shrink bool) {
+	C.gtk_paned_pack2(
+		PANED(v), 
+		ToNative(child), 
+		gbool(resize), 
+		gbool(shrink)
+	)
+}
+
+func (v *Paned) GetChild1() *Widget {
+	return &Widget{C.gtk_paned_get_child1(PANED(v))}
+}
+
+func (v *Paned) GetChild2() *Widget {
+	return &Widget{C.gtk_paned_get_child2(PANED(v))}
+}
+
+func (v *Paned) SetPosition(position int) {
+	C.gtk_paned_set_position(
+		PANED(v), 
+		gint(position)
+	)
+}
+
+func (v *Paned) GetPosition() int {
+	return int(C.gtk_paned_get_position(PANED(v)))
+}
+
+// gtkRange
+type Range struct {
+	Widget
+}
+
+func (v *Range) GetFillLevel() float64 {
+	r := C.gtk_range_get_fill_level(RANGE(v))
+	return float64(r)
+}
+
+func (v *Range) GetRestrictToFillLevel() bool {
+	return gobool(C.gtk_range_get_restrict_to_fill_level(RANGE(v)))
+}
+
+func (v *Range) GetShowFillLevel() bool {
+	return gobool(C.gtk_range_get_show_fill_level(RANGE(v)))
+}
+
+func (v *Range) SetFillLevel(value float64) {
+	C.gtk_range_set_fill_level(
+		RANGE(v), 
+		gdouble(value)
+	)
+}
+
+func (v *Range) SetRestrictToFillLevel(b bool) {
+	C.gtk_range_set_restrict_to_fill_level(
+		RANGE(v), 
+		gbool(b)
+	)
+}
+
+func (v *Range) SetShowFillLevel(b bool) {
+	C.gtk_range_set_show_fill_level(
+		RANGE(v), 
+		gbool(b)
+	)
+}
+
+func (v *Range) GetAdjustment() *Adjustment {
+	return &Adjustment{C.gtk_range_get_adjustment(RANGE(v))}
+}
+
+func (v *Range) SetAdjustment(a *Adjustment) {
+	C.gtk_range_set_adjustment(
+		RANGE(v), 
+		a.GAdjustment
+	)
+}
+
+func (v *Range) GetInverted() bool {
+	return gobool(C.gtk_range_get_inverted(RANGE(v)))
+}
+
+func (v *Range) SetInverted(b bool) {
+	C.gtk_range_set_inverted(
+		RANGE(v), 
+		gbool(b)
+	)
+}
+
+func (v *Range) SetIncrements(step, page float64) {
+	C.gtk_range_set_increments(
+		RANGE(v), 
+		gdouble(step), 
+		gdouble(page)
+	)
+}
+
+func (v *Range) SetRange(min, max float64) {
+	C.gtk_range_set_range(
+		RANGE(v), 
+		gdouble(min), 
+		gdouble(max)
+	)
+}
+
+func (v *Range) GetValue() float64 {
+	return float64(C.gtk_range_get_value(RANGE(v)))
+}
+
+func (v *Range) SetValue(value float64) {
+	C.gtk_range_set_value(
+		RANGE(v), 
+		gdouble(value)
+	)
+}
+
+func (v *Range) GetFlippable() bool {
+	panic_if_version_older(2, 18, 0, "gtk_range_get_flippable()")
+	return gobool(C._gtk_range_get_flippable(RANGE(v)))
+}
+
+func (v *Range) SetFlippable(b bool) {
+	panic_if_version_older(2, 18, 0, "gtk_range_set_flippable()")
+	C._gtk_range_set_flippable(
+		RANGE(v), 
+		gbool(b)
+	)
+}
+
+// gtkScale
+type PositionType int
+
+const (
+	POS_LEFT   PositionType = 0
+	POS_RIGHT  PositionType = 1
+	POS_TOP    PositionType = 2
+	POS_BOTTOM PositionType = 3
+)
+
+type Scale struct {
+	Range
+}
+
+func (v *Scale) SetDigits(digits int) {
+	C.gtk_scale_set_digits(
+		SCALE(v), 
+		gint(digits)
+	)
+}
+
+func (v *Scale) SetDrawValue(draw_value bool) {
+	C.gtk_scale_set_draw_value(
+		SCALE(v), 
+		gbool(draw_value)
+	)
+}
+
+func (v *Scale) SetValuePos(pos PositionType) {
+	C.gtk_scale_set_value_pos(
+		SCALE(v), 
+		C.GtkPositionType(pos)
+	)
+}
+
+func (v *Scale) GetDigits() int {
+	return int(C.gtk_scale_get_digits(SCALE(v)))
+}
+
+func (v *Scale) GetDrawValue() bool {
+	return gobool(C.gtk_scale_get_draw_value(SCALE(v)))
+}
+
+func (v *Scale) GetValuePos() PositionType {
+	return PositionType(C.gtk_scale_get_value_pos(SCALE(v)))
+}
+
+func (v *Scale) GetLayoutOffsets(x *int, y *int) {
+	var xx, yy C.gint
+	C.gtk_scale_get_layout_offsets(
+		SCALE(v), 
+		&xx, 
+		&yy
+	)
+	*x = int(xx)
+	*y = int(yy)
+}
+
+func (v *Scale) AddMark(value float64, position PositionType, markup string) {
+	ptr := C.CString(markup)
+	defer cfree(ptr)
+	C.gtk_scale_add_mark(
+		SCALE(v), 
+		gdouble(value), 
+		C.GtkPositionType(position), 
+		gstring(ptr)
+	)
+}
+
+func (v *Scale) ClearMarks() {
+	C.gtk_scale_clear_marks(SCALE(v))
+}
+
+// gtkSeparator
+type Separator struct {
+	Widget
+}
+
+// gtkWidget
+type Allocation gdk.Rectangle
+
+type AccelFlags int
+
+const (
+	ACCEL_VISIBLE AccelFlags = 1 << 0
+	ACCEL_LOCKED  AccelFlags = 1 << 1
+	ACCEL_MASK    AccelFlags = 0x07
+)
+
+type StateType int
+
+const (
+	STATE_NORMAL      StateType = 0
+	STATE_ACTIVE      StateType = 1
+	STATE_PRELIGHT    StateType = 2
+	STATE_SELECTED    StateType = 3
+	STATE_INSENSITIVE StateType = 4
+)
+
+type IWidget interface {
+	ToNative() *C.GtkWidget
+	Hide()
+	HideAll()
+	Show()
+	ShowAll()
+	ShowNow()
+	Destroy()
+	Connect(s string, f interface{}, data ...interface{}) int
+	GetTopLevel() *Widget
+	GetTopLevelAsWindow() *Window
+	HideOnDelete()
+	QueueResize()
+}
+
+func ToNative(w IWidget) *C.GtkWidget {
+	if w == nil {
+		log.Println("Attention: Youre tryng to convert interface IWidget from nil")
+		return nil
+	}
+	return w.ToNative()
+}
+
+type Widget struct {
+	GWidget *C.GtkWidget
+}
+
+func WidgetFromNative(p unsafe.Pointer) *Widget {
+	return &Widget{C.toGWidget(p)}
+}
+
+func WidgetFromObject(object *glib.GObject) *Widget {
+	return &Widget{C.toGWidget(object.Object)}
+}
+
+func (v *Widget) ToNative() *C.GtkWidget {
+	return v.GWidget
+}
+
+func (v *Widget) Connect(s string, f interface{}, datas ...interface{}) int {
+	return glib.ObjectFromNative(unsafe.Pointer(v.GWidget)).Connect(s, f, datas...)
+}
+
+func (v *Widget) StopEmission(s string) {
+	glib.ObjectFromNative(unsafe.Pointer(v.GWidget)).StopEmission(s)
+}
+
+func (v *Widget) Emit(s string) {
+	glib.ObjectFromNative(unsafe.Pointer(v.GWidget)).Emit(s)
+}
+
+func (v *Widget) HandlerBlock(id int) {
+	glib.ObjectFromNative(unsafe.Pointer(v.GWidget)).HandlerBlock(id)
+}
+
+func (v *Widget) HandlerUnblock(id int) {
+	glib.ObjectFromNative(unsafe.Pointer(v.GWidget)).HandlerUnblock(id)
+}
+
+func (v *Widget) HandlerDisconnect(id int) {
+	glib.ObjectFromNative(unsafe.Pointer(v.GWidget)).HandlerDisconnect(id)
+}
+
+func (v *Widget) Ref() {
+	deprecated_since(2, 12, 0, "gtk_widget_ref()")
+	C.gtk_widget_ref(v.GWidget)
+}
+
+func (v *Widget) Unref() {
+	deprecated_since(2, 12, 0, "gtk_widget_unref()")
+	C.gtk_widget_unref(v.GWidget)
+}
+
+func (v *Widget) Destroy() {
+	C.gtk_widget_destroy(v.GWidget)
+}
+
+func (v *Widget) Unparent() {
+	C.gtk_widget_unparent(v.GWidget)
+}
+
+func (v *Widget) Show() {
+	C.gtk_widget_show(v.GWidget)
+}
+
+func (v *Widget) ShowNow() {
+	C.gtk_widget_show_now(v.GWidget)
+}
+
+func (v *Widget) Hide() {
+	C.gtk_widget_hide(v.GWidget)
+}
+
+func (v *Widget) ShowAll() {
+	C.gtk_widget_show_all(v.GWidget)
+}
+
+func (v *Widget) HideAll() {
+	deprecated_since(2, 24, 0, "gtk_widget_hide_all()")
+	C.gtk_widget_hide_all(v.GWidget)
+}
+
+func (v *Widget) Map() {
+	C.gtk_widget_map(v.GWidget)
+}
+
+func (v *Widget) Unmap() {
+	C.gtk_widget_unmap(v.GWidget)
+}
+
+func (v *Widget) Realize() {
+	C.gtk_widget_realize(v.GWidget)
+}
+
+func (v *Widget) Unrealize() {
+	C.gtk_widget_unrealize(v.GWidget)
+}
+
+func (v *Widget) QueueDraw() {
+	C.gtk_widget_queue_draw(v.GWidget)
+}
+
+func (v *Widget) QueueResize() {
+	C.gtk_widget_queue_resize(v.GWidget)
+}
+
+func (v *Widget) QueueResizeNoRedraw() {
+	C.gtk_widget_queue_resize_no_redraw(v.GWidget)
+}
+
+func (v *Widget) AddAccelerator(signal string, group *AccelGroup, key uint, mods gdk.ModifierType, flags AccelFlags) {
+	csignal := C.CString(signal)
+	defer cfree(csignal)
+	C.gtk_widget_add_accelerator(
+		v.GWidget, 
+		gstring(csignal), 
+		group.GAccelGroup, 
+		guint(key),
+		C.GdkModifierType(mods), 
+		C.GtkAccelFlags(flags)
+	)
+}
+
+func (v *Widget) CanActivateAccel(signal_id uint) bool {
+	return gobool(C.gtk_widget_can_activate_accel(v.GWidget, guint(signal_id)))
+}
+
+func (v *Widget) Activate() {
+	C.gtk_widget_activate(v.GWidget)
+}
+
+func (v *Widget) Reparent(parent IWidget) {
+	C.gtk_widget_reparent(
+		v.GWidget, 
+		ToNative(parent)
+	)
+}
+
+func (v *Widget) IsFocus() bool {
+	return gobool(C.gtk_widget_is_focus(v.GWidget))
+}
+
+func (v *Widget) GrabFocus() {
+	C.gtk_widget_grab_focus(v.GWidget)
+}
+
+func (v *Widget) GrabDefault() {
+	C.gtk_widget_grab_default(v.GWidget)
+}
+
+func (v *Window) SetName(name string) {
+	ptr := C.CString(name)
+	defer cfree(ptr)
+	C.gtk_widget_set_name(
+		v.GWidget, 
+		gstring(ptr)
+	)
+}
+
+func (v *Window) GetName() string {
+	return gostring(C.gtk_widget_get_name(v.GWidget))
+}
+
+func (v *Widget) SetState(state StateType) {
+	C.gtk_widget_set_state(
+		v.GWidget, 
+		C.GtkStateType(state)
+	)
+}
+
+func (v *Widget) SetSensitive(setting bool) {
+	C.gtk_widget_set_sensitive(
+		v.GWidget, 
+		gbool(setting)
+	)
+}
+
+func (v *Widget) SetParent(parent IWidget) {
+	C.gtk_widget_set_parent(
+		v.GWidget, 
+		ToNative(parent)
+	)
+}
+
+func (v *Widget) SetParentWindow(parent *gdk.Window) {
+	C.gtk_widget_set_parent_window(
+		v.GWidget, 
+		C.toGdkWindow(unsafe.Pointer(parent.GWindow))
+	)
+}
+
+func (v *Widget) GetParentWindow() *gdk.Window {
+	return gdk.WindowFromUnsafe(unsafe.Pointer(C.gtk_widget_get_parent_window(v.GWidget)))
+}
+
+func (v *Widget) SetUSize(width int, height int) {
+	deprecated_since(2, 2, 0, "gtk_widget_set_usize()")
+	C.gtk_widget_set_usize(
+		v.GWidget, 
+		gint(width), 
+		gint(height)
+	)
+}
+
+func (v *Widget) SetEvents(events int) {
+	C.gtk_widget_set_events(
+		v.GWidget, 
+		gint(events)
+	)
+}
+
+func (v *Widget) AddEvents(events int) {
+	C.gtk_widget_add_events(
+		v.GWidget, 
+		gint(events)
+	)
+}
+
+func (v *Widget) GetTopLevel() *Widget {
+	return &Widget{C.gtk_widget_get_toplevel(v.GWidget)}
+}
+
+func (v *Widget) HideOnDelete() {
+	C._gtk_widget_hide_on_delete(v.GWidget)
+}
+
+func (v *Widget) RenderIcon(stock_id string, size IconSize, detail string) *gdkpixbuf.Pixbuf {
+	pstock_id := C.CString(stock_id)
+	defer cfree(pstock_id)
+	pdetail := C.CString(detail)
+	defer cfree(pdetail)
+	return &gdkpixbuf.Pixbuf{C.gtk_widget_render_icon(v.GWidget, gstring(pstock_id), C.GtkIconSize(size), gstring(pdetail))}
+}
+
+func (v *Widget) QueueClear() {
+	deprecated_since(2, 2, 0, "gtk_widget_queue_clear()")
+	C.gtk_widget_queue_clear(v.GWidget)
+}
+
+func (v *Widget) SetAppPaintable(setting bool) {
+	C.gtk_widget_set_app_paintable(
+		v.GWidget, 
+		gbool(setting)
+	)
+}
+
+func (v *Widget) SetDoubleBuffered(setting bool) {
+	C.gtk_widget_set_double_buffered(
+		v.GWidget, 
+		gbool(setting)
+	)
+}
+
+func (v *Widget) SetRedrawOnAllocate(setting bool) {
+	C.gtk_widget_set_redraw_on_allocate(
+		v.GWidget, 
+		gbool(setting)
+	)
+}
+
+func (v *Widget) MnemonicActivate(group_cycling bool) bool {
+	return gobool(C.gtk_widget_mnemonic_activate(v.GWidget, gbool(group_cycling)))
+}
+
+func (v *Widget) GetChildVisible() bool {
+	return gobool(C.gtk_widget_get_child_visible(v.GWidget))
+}
+
+func (v *Widget) GetParent() *Widget {
+	return &Widget{C.gtk_widget_get_parent(v.GWidget)}
+}
+
+func (v *Widget) GetSettings() *Settings {
+	return &Settings{C.gtk_widget_get_settings(v.GWidget)}
+}
+
+func (v *Widget) GetSizeRequest(width *int, height *int) {
+	var w, h C.gint
+	C.gtk_widget_get_size_request(
+		v.GWidget, 
+		&w, 
+		&h
+	)
+	*width = int(w)
+	*height = int(h)
+}
+
+func (v *Widget) SetChildVisible(setting bool) {
+	C.gtk_widget_set_child_visible(
+		v.GWidget, 
+		gbool(setting)
+	)
+}
+
+func (v *Widget) SetSizeRequest(width int, height int) {
+	C.gtk_widget_set_size_request(
+		v.GWidget, 
+		gint(width), 
+		gint(height)
+	)
+}
+
+func (v *Widget) SetNoShowAll(setting bool) {
+	C.gtk_widget_set_no_show_all(
+		v.GWidget, 
+		gbool(setting)
+	)
+}
+
+func (v *Widget) GetNoShowAll() bool {
+	return gobool(C.gtk_widget_get_no_show_all(v.GWidget))
+}
+
+func (v *Widget) IsComposited() bool {
+	return gobool(C.gtk_widget_is_composited(v.GWidget))
+}
+
+func (v *Widget) GetTooltipMarkup() string {
+	return gostring(C.gtk_widget_get_tooltip_markup(v.GWidget))
+}
+
+func (v *Widget) SetTooltipMarkup(markup string) {
+	ptr := C.CString(markup)
+	defer cfree(ptr)
+	C.gtk_widget_set_tooltip_markup(
+		v.GWidget, 
+		gstring(ptr)
+	)
+}
+
+func (v *Widget) GetTooltipText() string {
+	return gostring(C.gtk_widget_get_tooltip_text(v.GWidget))
+}
+
+func (v *Widget) SetTooltipText(text string) {
+	ptr := C.CString(text)
+	defer cfree(ptr)
+	C.gtk_widget_set_tooltip_text(
+		v.GWidget, 
+		gstring(ptr)
+	)
+}
+
+func (v *Widget) GetTooltipWindow() *Window {
+	return &Window{Bin{Container{Widget{C.toGWidget(unsafe.Pointer(C.gtk_widget_get_tooltip_window(v.GWidget)))}}}}
+}
+
+func (v *Widget) SetTooltipWindow(w *Window) {
+	C.gtk_widget_set_tooltip_window(
+		v.GWidget, 
+		C.toGWindow(ToNative(w))
+	)
+}
+
+func (v *Widget) GetHasTooltip() bool {
+	return gobool(C.gtk_widget_get_has_tooltip(v.GWidget))
+}
+
+func (v *Widget) SetHasTooltip(setting bool) {
+	C.gtk_widget_set_has_tooltip(
+		v.GWidget, 
+		gbool(setting)
+	)
+}
+
+func (v *Widget) GetWindow() *gdk.Window {
+	return gdk.WindowFromUnsafe(unsafe.Pointer(C.gtk_widget_get_window(v.GWidget)))
+}
+
+func (v *Widget) GetAllocation(allocation *Allocation) {
+	panic_if_version_older(2, 18, 0, "gtk_widget_get_allocation()")
+	var _allocation C.GtkAllocation
+	C._gtk_widget_get_allocation(
+		v.GWidget, 
+		&_allocation
+	)
+	allocation.X = int(_allocation.x)
+	allocation.Y = int(_allocation.y)
+	allocation.Width = int(_allocation.width)
+	allocation.Height = int(_allocation.height)
+}
+
+func (v *Widget) SetAllocation(allocation *Allocation) {
+	panic_if_version_older(2, 18, 0, "gtk_widget_set_allocation()")
+	var _allocation C.GtkAllocation
+	_allocation.x = gint(allocation.X)
+	_allocation.y = gint(allocation.Y)
+	_allocation.width = gint(allocation.Width)
+	_allocation.height = gint(allocation.Height)
+	C._gtk_widget_set_allocation(
+		v.GWidget, 
+		&_allocation
+	)
+}
+
+func (v *Widget) GetAppPaintable() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_get_app_paintable()")
+	return gobool(C._gtk_widget_get_app_paintable(v.GWidget))
+}
+
+func (v *Widget) GetCanDefault() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_get_can_default()")
+	return gobool(C._gtk_widget_get_can_default(v.GWidget))
+}
+
+func (v *Widget) SetCanDefault(setting bool) {
+	panic_if_version_older(2, 18, 0, "gtk_widget_set_can_default()")
+	C._gtk_widget_set_can_default(
+		v.GWidget, 
+		gbool(setting)
+	)
+}
+
+func (v *Widget) GetCanFocus() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_get_can_focus()")
+	return gobool(C._gtk_widget_get_can_focus(v.GWidget))
+}
+
+func (v *Widget) SetCanFocus(setting bool) {
+	panic_if_version_older(2, 18, 0, "gtk_widget_set_can_focus()")
+	C._gtk_widget_set_can_focus(
+		v.GWidget, 
+		gbool(setting)
+	)
+}
+
+func (v *Widget) GetDoubleBuffered() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_get_double_buffered()")
+	return gobool(C._gtk_widget_get_double_buffered(v.GWidget))
+}
+
+func (v *Widget) GetHasWindow() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_get_has_window()")
+	return gobool(C._gtk_widget_get_has_window(v.GWidget))
+}
+
+func (v *Widget) SetHasWindow(setting bool) {
+	panic_if_version_older(2, 18, 0, "gtk_widget_set_has_window()")
+	C._gtk_widget_set_has_window(
+		v.GWidget, 
+		gbool(setting)
+	)
+}
+
+func (v *Widget) GetSensitive() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_get_sensitive()")
+	return gobool(C._gtk_widget_get_sensitive(v.GWidget))
+}
+
+func (v *Widget) IsSensitive() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_is_sensitive()")
+	return gobool(C._gtk_widget_is_sensitive(v.GWidget))
+}
+
+func (v *Widget) GetState() StateType {
+	panic_if_version_older(2, 18, 0, "gtk_widget_get_state()")
+	return StateType(C._gtk_widget_get_state(v.GWidget))
+}
+
+func (v *Widget) GetVisible() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_get_visible()")
+	return gobool(C._gtk_widget_get_visible(v.GWidget))
+}
+
+func (v *Widget) SetVisible(setting bool) {
+	panic_if_version_older(2, 18, 0, "gtk_widget_set_visible()")
+	C._gtk_widget_set_visible(
+		v.GWidget, 
+		gbool(setting)
+	)
+}
+
+func (v *Widget) HasDefault() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_has_default()")
+	return gobool(C._gtk_widget_has_default(v.GWidget))
+}
+
+func (v *Widget) HasFocus() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_has_focus()")
+	return gobool(C._gtk_widget_has_focus(v.GWidget))
+}
+
+func (v *Widget) HasGrab() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_has_grab()")
+	return gobool(C._gtk_widget_has_grab(v.GWidget))
+}
+
+func (v *Widget) IsDrawable() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_is_drawable()")
+	return gobool(C._gtk_widget_is_drawable(v.GWidget))
+}
+
+func (v *Widget) IsToplevel() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_is_toplevel()")
+	return gobool(C._gtk_widget_is_toplevel(v.GWidget))
+}
+
+func (v *Widget) SetWindow(window *gdk.Window) {
+	panic_if_version_older(2, 18, 0, "gtk_widget_set_window()")
+	C._gtk_widget_set_window(
+		v.GWidget, 
+		C.toGdkWindow(unsafe.Pointer(window.GWindow))
+	)
+}
+
+func (v *Widget) SetReceivesDefault(setting bool) {
+	panic_if_version_older(2, 18, 0, "gtk_widget_set_receives_default()")
+	C._gtk_widget_set_receives_default(
+		v.GWidget, 
+		gbool(setting)
+	)
+}
+
+func (v *Widget) GetReceivesDefault() bool {
+	panic_if_version_older(2, 18, 0, "gtk_widget_get_receives_default()")
+	return gobool(C._gtk_widget_get_receives_default(v.GWidget))
+}
+
+func (v *Widget) GetTopLevelAsWindow() *Window {
+	return &Window{Bin{Container{Widget{C.gtk_widget_get_toplevel(v.GWidget)}}}}
+}
+
+func (v *Widget) ModifyFontEasy(desc string) {
+	pdesc := C.CString(desc)
+	defer cfree(pdesc)
+	C.gtk_widget_modify_font(
+		v.GWidget, 
+		C.pango_font_description_from_string(pdesc)
+	)
+}
+
+func (v *Widget) ModifyBG(state StateType, color *gdk.Color) {
+	C.gtk_widget_modify_bg(
+		v.GWidget, 
+		C.GtkStateType(state), 
+		(*C.GdkColor)(unsafe.Pointer(&color.GColor))
+	)
+}
+
+// gtkBuilder
+type Builder struct {
+	GBuilder *C.GtkBuilder
+}
+
+func NewBuilder() *Builder {
+	return &Builder{C.gtk_builder_new()}
+}
+
+func (v *Builder) AddFromFile(filename string) (ret uint, error *glib.Error) {
+	var gerror *C.GError
+	ptr := C.CString(filename)
+	defer cfree(ptr)
+	ret = uint(C.gtk_builder_add_from_file(v.GBuilder, gstring(ptr), &gerror))
+	if gerror != nil {
+		error = glib.ErrorFromNative(unsafe.Pointer(gerror))
+	} else {
+		error = nil
+	}
+	return
+}
+
+func (v *Builder) AddFromString(buffer string) (ret uint, error *glib.Error) {
+	var gerror *C.GError
+	ptr := C.CString(buffer)
+	defer cfree(ptr)
+	ret = uint(C.gtk_builder_add_from_string(v.GBuilder, gstring(ptr), C.gsize(C.strlen(ptr)), &gerror))
+	if gerror != nil {
+		error = glib.ErrorFromNative(unsafe.Pointer(gerror))
+	} else {
+		error = nil
+	}
+	return
+}
+
+func (v *Builder) GetObject(name string) *glib.GObject {
+	ptr := C.CString(name)
+	defer cfree(ptr)
+	return &glib.GObject{unsafe.Pointer(C.gtk_builder_get_object(v.GBuilder, gstring(ptr)))}
+}
+
+func (v *Builder) GetObjects() *glib.SList {
+	return glib.SListFromNative(unsafe.Pointer(C.gtk_builder_get_objects(v.GBuilder)))
+}
+
+func (v *Builder) ConnectSignals(user_data interface{}) {
+	C.gtk_builder_connect_signals(
+		v.GBuilder, 
+		nil
+	)
+}
+
+func (v *Builder) SetTranslationDomain(domain string) {
+	ptr := C.CString(domain)
+	defer cfree(ptr)
+	C.gtk_builder_set_translation_domain(
+		v.GBuilder, 
+		gstring(ptr)
+	)
+}
+
+func (v *Builder) GetTranslationDomain() string {
+	return gostring(C.gtk_builder_get_translation_domain(v.GBuilder))
+}
+
+func (v *Builder) GetTypeFromName(type_name string) int {
+	ptr := C.CString(type_name)
+	defer cfree(ptr)
+	return int(C.gtk_builder_get_type_from_name(v.GBuilder, ptr))
+}
