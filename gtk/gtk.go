@@ -3924,3 +3924,2375 @@ func (v *TextView) SetEditable(setting bool) {
 		gbool(setting)
 	)
 }
+
+func (v *TextView) GetEditable() bool {
+	return gobool(C.gtk_text_view_get_editable(TEXT_VIEW(v)))
+}
+
+func (v *TextView) SetCursorVisible(setting bool) {
+	C.gtk_text_view_set_cursor_visible(
+		TEXT_VIEW(v), 
+		gbool(setting)
+	)
+}
+
+func (v *TextView) GetCursorVisible() bool {
+	return gobool(C.gtk_text_view_get_cursor_visible(TEXT_VIEW(v)))
+}
+
+func (v *TextView) SetOverwrite(overwrite bool) {
+	C.gtk_text_view_set_overwrite(
+		TEXT_VIEW(v), 
+		gbool(overwrite)
+	)
+}
+
+func (v *TextView) GetOverwrite() bool {
+	return gobool(C.gtk_text_view_get_overwrite(TEXT_VIEW(v)))
+}
+
+func (v *TextView) SetAcceptsTab(accepts_tab bool) {
+	C.gtk_text_view_set_accepts_tab(
+		TEXT_VIEW(v), 
+		gbool(accepts_tab)
+	)
+}
+
+func (v *TextView) GetAcceptsTab() bool {
+	return gobool(C.gtk_text_view_get_accepts_tab(TEXT_VIEW(v)))
+}
+
+// gtkTreePath
+type TreePath struct {
+	GTreePath *C.GtkTreePath
+}
+
+func NewTreePath() *TreePath {
+	return &TreePath{C.gtk_tree_path_new()}
+}
+
+func NewTreePathFromString(path string) *TreePath {
+	ptr := C.CString(path)
+	defer cfree(ptr)
+	return &TreePath{C.gtk_tree_path_new_from_string(gstring(ptr))}
+}
+
+func NewTreePathNewFirst() *TreePath {
+	return &TreePath{C.gtk_tree_path_new_first()}
+}
+
+func (v *TreePath) String() string {
+	return gostring(C.gtk_tree_path_to_string(v.GTreePath))
+}
+
+func (v *TreePath) AppendIndex(index int) {
+	C.gtk_tree_path_append_index(
+		v.GTreePath, 
+		gint(index)
+	)
+}
+
+func (v *TreePath) PrependIndex(index int) {
+	C.gtk_tree_path_prepend_index(
+		v.GTreePath, 
+		gint(index)
+	)
+}
+
+func (v *TreePath) GetDepth() int {
+	return int(C.gtk_tree_path_get_depth(v.GTreePath))
+}
+
+func (v *TreePath) Free() {
+	C.gtk_tree_path_free(v.GTreePath)
+}
+
+func (v *TreePath) Copy() *TreePath {
+	return &TreePath{C.gtk_tree_path_copy(v.GTreePath)}
+}
+
+func (v *TreePath) Compare(w TreePath) int {
+	return int(C.gtk_tree_path_compare(v.GTreePath, w.GTreePath))
+}
+
+func (v *TreePath) Next() {
+	C.gtk_tree_path_next(v.GTreePath)
+}
+
+func (v *TreePath) Prev() bool {
+	return gobool(C.gtk_tree_path_prev(v.GTreePath))
+}
+
+func (v *TreePath) Up() bool {
+	return gobool(C.gtk_tree_path_up(v.GTreePath))
+}
+
+func (v *TreePath) Down() {
+	C.gtk_tree_path_down(v.GTreePath)
+}
+
+func (v *TreePath) IsAncestor(descendant TreePath) bool {
+	return gobool(C.gtk_tree_path_is_ancestor(v.GTreePath, descendant.GTreePath))
+}
+
+func (v *TreePath) IsDescendant(ancestor TreePath) bool {
+	return gobool(C.gtk_tree_path_is_descendant(v.GTreePath, ancestor.GTreePath))
+}
+
+// gtkTreeIter
+type TreeIter struct {
+	GTreeIter C.GtkTreeIter
+}
+
+func (v *TreeIter) Assign(to *TreeIter) {
+	C._gtk_tree_iter_assign(
+		unsafe.Pointer(&v.GTreeIter), 
+		unsafe.Pointer(&to.GTreeIter)
+	)
+}
+
+// gtkTreeModel
+type TreeModelFlags int
+
+const (
+	TREE_MODEL_ITERS_PERSIST TreeModelFlags = 1 << 0
+	TREE_MODEL_LIST_ONLY     TreeModelFlags = 1 << 1
+)
+
+type ITreeModel interface {
+	cTreeModel() *C.GtkTreeModel
+}
+
+type TreeModel struct {
+	GTreeModel *C.GtkTreeModel
+}
+
+func (v TreeModel) cTreeModel() *C.GtkTreeModel {
+	return v.GTreeModel
+}
+
+func (v *TreeModel) GetFlags() TreeModelFlags {
+	return TreeModelFlags(C.gtk_tree_model_get_flags(v.GTreeModel))
+}
+
+func (v *TreeModel) GetNColumns() int {
+	return int(C.gtk_tree_model_get_n_columns(v.GTreeModel))
+}
+
+func (v *TreeModel) GetIter(iter *TreeIter, path *TreePath) bool {
+	return gobool(C.gtk_tree_model_get_iter(v.GTreeModel, &iter.GTreeIter, path.GTreePath))
+}
+
+func (v *TreeModel) GetIterFromString(iter *TreeIter, path_string string) bool {
+	ptr := C.CString(path_string)
+	defer cfree(ptr)
+	return gobool(C.gtk_tree_model_get_iter_from_string(v.GTreeModel, &iter.GTreeIter, gstring(ptr)))
+}
+
+func (v *TreeModel) GetIterFirst(iter *TreeIter) bool {
+	return gobool(C.gtk_tree_model_get_iter_first(v.GTreeModel, &iter.GTreeIter))
+}
+
+func (v *TreeModel) GetPath(iter *TreeIter) *TreePath {
+	return &TreePath{C._gtk_tree_model_get_path(v.GTreeModel, &iter.GTreeIter)}
+}
+
+func (v *TreeModel) GetValue(iter *TreeIter, col int, val *glib.GValue) {
+	C.gtk_tree_model_get_value(
+		v.GTreeModel, 
+		&iter.GTreeIter, 
+		gint(col), 
+		C.toGValue(unsafe.Pointer(&val.Value))
+	)
+}
+
+func (v *TreeModel) IterNext(iter *TreeIter) bool {
+	return gobool(C.gtk_tree_model_iter_next(v.GTreeModel, &iter.GTreeIter))
+}
+
+func (v *TreeModel) IterChildren(iter *TreeIter, parent *TreeIter) bool {
+	return gobool(C.gtk_tree_model_iter_children(v.GTreeModel, &iter.GTreeIter, &parent.GTreeIter))
+}
+
+func (v *TreeModel) IterHasChild(iter *TreeIter) bool {
+	return gobool(C.gtk_tree_model_iter_has_child(v.GTreeModel, &iter.GTreeIter))
+}
+
+func (v *TreeModel) IterNChildren(iter *TreeIter) int {
+	return int(C.gtk_tree_model_iter_n_children(v.GTreeModel, &iter.GTreeIter))
+}
+
+func (v *TreeModel) IterNthChild(iter *TreeIter, parent *TreeIter, n int) bool {
+	return gobool(C.gtk_tree_model_iter_nth_child(v.GTreeModel, &iter.GTreeIter, &parent.GTreeIter, gint(n)))
+}
+
+func (v *TreeModel) IterParent(iter *TreeIter, child *TreeIter) bool {
+	return gobool(C.gtk_tree_model_iter_parent(v.GTreeModel, &iter.GTreeIter, &child.GTreeIter))
+}
+
+func (v *TreeModel) GetStringFromIter(i *TreeIter) string {
+	return gostring(C.gtk_tree_model_get_string_from_iter(v.GTreeModel, &i.GTreeIter))
+}
+
+// gtkTreeSelection
+type TreeSelection struct {
+	GTreeSelection *C.GtkTreeSelection
+}
+
+type SelectionMode int
+
+const (
+	SELECTION_NONE     SelectionMode = 0
+	SELECTION_SINGLE   SelectionMode = 1
+	SELECTION_BROWSE   SelectionMode = 2
+	SELECTION_MULTIPLE SelectionMode = 3
+	SELECTION_EXTENDED               = SELECTION_MULTIPLE
+)
+
+func (v *TreeSelection) Connect(s string, f interface{}, datas ...interface{}) int {
+	return glib.ObjectFromNative(unsafe.Pointer(v.GTreeSelection)).Connect(s, f, datas...)
+}
+
+func (v *TreeSelection) SetMode(m SelectionMode) {
+	C.gtk_tree_selection_set_mode(
+		v.GTreeSelection, 
+		C.GtkSelectionMode(m)
+	)
+}
+
+func (v *TreeSelection) GetMode() SelectionMode {
+	return SelectionMode(C.gtk_tree_selection_get_mode(v.GTreeSelection))
+}
+
+func (v *TreeSelection) GetSelected(i *TreeIter) bool {
+	return gobool(C.gtk_tree_selection_get_selected(v.GTreeSelection, nil, &i.GTreeIter))
+}
+
+func (v *TreeSelection) CountSelectedRows() int {
+	return int(C.gtk_tree_selection_count_selected_rows(v.GTreeSelection))
+}
+
+func (v *TreeSelection) SelectPath(path *TreePath) {
+	C.gtk_tree_selection_select_path(
+		v.GTreeSelection, 
+		path.GTreePath
+	)
+}
+
+func (v *TreeSelection) UnselectPath(path *TreePath) {
+	C.gtk_tree_selection_unselect_path(
+		v.GTreeSelection, 
+		path.GTreePath
+	)
+}
+
+func (v *TreeSelection) PathIsSelected(path *TreePath) bool {
+	return gobool(C.gtk_tree_selection_path_is_selected(v.GTreeSelection, path.GTreePath))
+}
+
+func (v *TreeSelection) SelectIter(iter *TreeIter) {
+	C.gtk_tree_selection_select_iter(v.GTreeSelection, &iter.GTreeIter)
+}
+
+func (v *TreeSelection) UnselectIter(iter *TreeIter) {
+	C.gtk_tree_selection_unselect_iter(v.GTreeSelection, &iter.GTreeIter)
+}
+
+func (v *TreeSelection) IterIsSelected(iter *TreeIter) bool {
+	return gobool(C.gtk_tree_selection_iter_is_selected(v.GTreeSelection, &iter.GTreeIter))
+}
+
+func (v *TreeSelection) SelectAll() {
+	C.gtk_tree_selection_select_all(v.GTreeSelection)
+}
+
+func (v *TreeSelection) UnselectAll() {
+	C.gtk_tree_selection_unselect_all(v.GTreeSelection)
+}
+
+func (v *TreeSelection) SelectRange(start_path *TreePath, end_path *TreePath) {
+	C.gtk_tree_selection_select_range(
+		v.GTreeSelection, 
+		start_path.GTreePath, 
+		end_path.GTreePath
+	)
+}
+
+func (v *TreeSelection) UnselectRange(start_path *TreePath, end_path *TreePath) {
+	C.gtk_tree_selection_unselect_range(
+		v.GTreeSelection, 
+		start_path.GTreePath, 
+		end_path.GTreePath
+	)
+}
+
+// gtkTreeViewColumn
+type TreeViewColumnSizing int
+
+const (
+	TREE_VIEW_COLUMN_GROW_ONLY TreeViewColumnSizing = 0
+	TREE_VIEW_COLUMN_AUTOSIZE  TreeViewColumnSizing = 1
+	TREE_VIEW_COLUMN_FIXED     TreeViewColumnSizing = 2
+)
+
+type TreeViewColumn struct {
+	GTreeViewColumn *C.GtkTreeViewColumn
+	*glib.GObject
+}
+
+func newTreeViewColumn(column *C.GtkTreeViewColumn) *TreeViewColumn {
+	return &TreeViewColumn{
+		GTreeViewColumn: column,
+		GObject:         glib.ObjectFromNative(unsafe.Pointer(column)),
+	}
+}
+
+func NewTreeViewColumn() *TreeViewColumn {
+	return newTreeViewColumn(C.gtk_tree_view_column_new())
+}
+
+func NewTreeViewColumnWithAttributes2(title string, cell ICellRenderer, attributes ...interface{}) *TreeViewColumn {
+	if len(attributes)%2 != 0 {
+		log.Panic("Error in gtk.TreeViewColumnWithAttributes: last attribute isn't associated to a value, len(attributes) must be even")
+	}
+	ptrTitle := C.CString(title)
+	defer cfree(ptrTitle)
+	ret := newTreeViewColumn(C._gtk_tree_view_column_new_with_attribute(
+		gstring(ptrTitle), cell.ToCellRenderer()))
+	for i := 0; i < len(attributes)/2; i++ {
+		attribute, ok := attributes[2*i].(string)
+		if !ok {
+			log.Panic("Error calling gtk.TreeViewColumnWithAttributes: property name must be a string")
+		}
+		ptrAttribute := C.CString(attribute)
+		column, ok := attributes[2*i].(int)
+		if !ok {
+			log.Panic("Error calling gtk.TreeViewColumnWithAttributes: attributes column must be an int")
+		}
+		C.gtk_tree_view_column_add_attribute(
+			ret.GTreeViewColumn,
+			cell.ToCellRenderer(), 
+			gstring(ptrAttribute), 
+			gint(column)
+		)
+	}
+	return ret
+}
+
+func NewTreeViewColumnWithAttribute(title string, cell ICellRenderer) *TreeViewColumn {
+	ptitle := C.CString(title)
+	defer cfree(ptitle)
+	return newTreeViewColumn(
+		C._gtk_tree_view_column_new_with_attribute(
+			gstring(ptitle), 
+			cell.ToCellRenderer()
+		)
+	)
+}
+
+func NewTreeViewColumnWithAttributes(title string, cell ICellRenderer, attribute string, column int) *TreeViewColumn {
+	ptitle := C.CString(title)
+	defer cfree(ptitle)
+	pattribute := C.CString(attribute)
+	defer cfree(pattribute)
+	return newTreeViewColumn(
+		C._gtk_tree_view_column_new_with_attributes(
+			gstring(ptitle), 
+			cell.ToCellRenderer(), 
+			gstring(pattribute), 
+			gint(column)
+		)
+	)
+}
+
+func (v *TreeViewColumn) PackStart(cell ICellRenderer, expand bool) {
+	C.gtk_tree_view_column_pack_start(
+		v.GTreeViewColumn, 
+		cell.ToCellRenderer(), 
+		gbool(expand)
+	)
+}
+
+func (v *TreeViewColumn) PackEnd(cell ICellRenderer, expand bool) {
+	C.gtk_tree_view_column_pack_end(
+		v.GTreeViewColumn, 
+		cell.ToCellRenderer(), 
+		gbool(expand)
+	)
+}
+
+func (v *TreeViewColumn) Clear() {
+	C.gtk_tree_view_column_clear(v.GTreeViewColumn)
+}
+
+func (v *TreeViewColumn) AddAttribute(cell ICellRenderer, attribute string, column int) {
+	ptr := C.CString(attribute)
+	defer cfree(ptr)
+	C.gtk_tree_view_column_add_attribute(
+		v.GTreeViewColumn, 
+		cell.ToCellRenderer(), 
+		gstring(ptr), 
+		gint(column)
+	)
+}
+
+func (v *TreeViewColumn) SetSpacing(spacing int) {
+	C.gtk_tree_view_column_set_spacing(
+		v.GTreeViewColumn, 
+		gint(spacing)
+	)
+}
+
+func (v *TreeViewColumn) GetSpacing() int {
+	return int(C.gtk_tree_view_column_get_spacing(v.GTreeViewColumn))
+}
+
+func (v *TreeViewColumn) SetVisible(resizable bool) {
+	C.gtk_tree_view_column_set_visible(
+		v.GTreeViewColumn, 
+		gbool(resizable)
+	)
+}
+
+func (v *TreeViewColumn) GetVisible() bool {
+	return gobool(C.gtk_tree_view_column_get_visible(v.GTreeViewColumn))
+}
+
+func (v *TreeViewColumn) SetResizable(resizable bool) {
+	C.gtk_tree_view_column_set_resizable(
+		v.GTreeViewColumn, 
+		gbool(resizable)
+	)
+}
+
+func (v *TreeViewColumn) GetResizable() bool {
+	return gobool(C.gtk_tree_view_column_get_resizable(v.GTreeViewColumn))
+}
+
+func (v *TreeViewColumn) SetSizing(s TreeViewColumnSizing) {
+	C.gtk_tree_view_column_set_sizing(
+		v.GTreeViewColumn, 
+		C.GtkTreeViewColumnSizing(s)
+	)
+}
+
+func (v *TreeViewColumn) GetSizing() TreeViewColumnSizing {
+	return TreeViewColumnSizing(C.gtk_tree_view_column_get_sizing(v.GTreeViewColumn))
+}
+
+func (v *TreeViewColumn) GetWidth() int {
+	return int(C.gtk_tree_view_column_get_width(v.GTreeViewColumn))
+}
+
+func (v *TreeViewColumn) GetFixedWidth() int {
+	return int(C.gtk_tree_view_column_get_fixed_width(v.GTreeViewColumn))
+}
+
+func (v *TreeViewColumn) SetFixedWidth(w int) {
+	C.gtk_tree_view_column_set_fixed_width(
+		v.GTreeViewColumn, 
+		gint(w)
+	)
+}
+
+func (v *TreeViewColumn) SetMinWidth(w int) {
+	C.gtk_tree_view_column_set_min_width(
+		v.GTreeViewColumn, 
+		gint(w)
+	)
+}
+
+func (v *TreeViewColumn) GetMinWidth() int {
+	return int(C.gtk_tree_view_column_get_min_width(v.GTreeViewColumn))
+}
+
+func (v *TreeViewColumn) SetMaxWidth(w int) {
+	C.gtk_tree_view_column_set_max_width(
+		v.GTreeViewColumn, 
+		gint(w)
+	)
+}
+
+func (v *TreeViewColumn) GetMaxWidth() int {
+	return int(C.gtk_tree_view_column_get_max_width(v.GTreeViewColumn))
+}
+
+func (v *TreeViewColumn) Clicked() {
+	C.gtk_tree_view_column_clicked(v.GTreeViewColumn)
+}
+
+func (v *TreeViewColumn) SetTitle(title string) {
+	ptr := C.CString(title)
+	defer cfree(ptr)
+	C.gtk_tree_view_column_set_title(
+		v.GTreeViewColumn, 
+		gstring(ptr)
+	)
+}
+
+func (v *TreeViewColumn) GetTitle() string {
+	return gostring(C.gtk_tree_view_column_get_title(v.GTreeViewColumn))
+}
+
+func (v *TreeViewColumn) SetExpand(expand bool) {
+	C.gtk_tree_view_column_set_expand(
+		v.GTreeViewColumn, 
+		gbool(expand)
+	)
+}
+
+func (v *TreeViewColumn) GetExpand() bool {
+	return gobool(C.gtk_tree_view_column_get_expand(v.GTreeViewColumn))
+}
+
+func (v *TreeViewColumn) SetClickable(clickable bool) {
+	C.gtk_tree_view_column_set_clickable(
+		v.GTreeViewColumn, 
+		gbool(clickable)
+	)
+}
+
+func (v *TreeViewColumn) GetClickable() bool {
+	return gobool(C.gtk_tree_view_column_get_clickable(v.GTreeViewColumn))
+}
+
+func (v *TreeViewColumn) SetReorderable(reorderable bool) {
+	C.gtk_tree_view_column_set_reorderable(
+		v.GTreeViewColumn, 
+		gbool(reorderable)
+	)
+}
+
+func (v *TreeViewColumn) GetReorderable() bool {
+	return gobool(C.gtk_tree_view_column_get_reorderable(v.GTreeViewColumn))
+}
+
+// gtkTreeView
+type TreeView struct {
+	Container
+}
+
+func NewTreeView() *TreeView {
+	return &TreeView{Container{Widget{C.gtk_tree_view_new()}}}
+}
+
+func (v *TreeView) SetModel(model ITreeModel) {
+	var tm *C.GtkTreeModel
+	if model != nil {
+		tm = model.cTreeModel()
+	}
+	C.gtk_tree_view_set_model(
+		TREE_VIEW(v), 
+		tm
+	)
+}
+
+func (v *TreeView) GetSelection() *TreeSelection {
+	return &TreeSelection{C.gtk_tree_view_get_selection(TREE_VIEW(v))}
+}
+
+func (v *TreeView) SetHeadersVisible(flag bool) {
+	C.gtk_tree_view_set_headers_visible(
+		TREE_VIEW(v), 
+		gbool(flag)
+	)
+}
+
+func (v *TreeView) AppendColumn(c *TreeViewColumn) int {
+	return int(C.gtk_tree_view_append_column(TREE_VIEW(v), c.GTreeViewColumn))
+}
+
+func (v *TreeView) GetColumn(n int) *TreeViewColumn {
+	return newTreeViewColumn(C.gtk_tree_view_get_column(TREE_VIEW(v), gint(n)))
+}
+
+func (v *TreeView) ScrollToCell(path *TreePath, col *TreeViewColumn, use bool, ra, ca float64) {
+	var pcol *C.GtkTreeViewColumn
+	if nil == col {
+		pcol = nil
+	} else {
+		pcol = col.GTreeViewColumn
+	}
+	C.gtk_tree_view_scroll_to_cell(
+		TREE_VIEW(v), 
+		path.GTreePath, 
+		pcol, 
+		gbool(use), 
+		C.gfloat(ra), 
+		C.gfloat(ca)
+	)
+}
+
+func (v *TreeView) SetCursor(path *TreePath, col *TreeViewColumn, se bool) {
+	var pcol *C.GtkTreeViewColumn
+	if nil == col {
+		pcol = nil
+	} else {
+		pcol = col.GTreeViewColumn
+	}
+	C.gtk_tree_view_set_cursor(
+		TREE_VIEW(v), 
+		path.GTreePath, 
+		pcol, 
+		gbool(se)
+	)
+}
+
+func (v *TreeView) GetCursor(path **TreePath, focus_column **TreeViewColumn) {
+	*path = &TreePath{nil}
+	if nil != focus_column {
+		*focus_column = &TreeViewColumn{nil, nil}
+		C.gtk_tree_view_get_cursor(
+			TREE_VIEW(v), 
+			&(*path).GTreePath, 
+			&(*focus_column).GTreeViewColumn
+		)
+	} else {
+		C.gtk_tree_view_get_cursor(
+			TREE_VIEW(v), 
+			&(*path).GTreePath, 
+			nil
+		)
+	}
+}
+
+func (v *TreeView) ExpandAll() {
+	C.gtk_tree_view_expand_all(TREE_VIEW(v))
+}
+
+func (v *TreeView) CollapseAll() {
+	C.gtk_tree_view_collapse_all(TREE_VIEW(v))
+}
+
+func (v *TreeView) ExpandRow(path *TreePath, openall bool) bool {
+	return gobool(C.gtk_tree_view_expand_row(TREE_VIEW(v), path.GTreePath, gbool(openall)))
+}
+
+func (v *TreeView) CollapseRow(path *TreePath) bool {
+	return gobool(C.gtk_tree_view_collapse_row(TREE_VIEW(v), path.GTreePath))
+}
+
+func (v *TreeView) RowExpanded(path *TreePath) bool {
+	return gobool(C.gtk_tree_view_row_expanded(TREE_VIEW(v), path.GTreePath))
+}
+
+// gtkIconView
+type IconView struct {
+	Container
+}
+
+func NewIconView() *IconView {
+	return &IconView{Container{Widget{
+		C.gtk_icon_view_new()}}}
+}
+
+func NewIconViewWithModel(model ITreeModel) *IconView {
+	var tm *C.GtkTreeModel
+	if model != nil {
+		tm = model.cTreeModel()
+	}
+	return &IconView{Container{Widget{C.gtk_icon_view_new_with_model(tm)}}}
+}
+
+func (v *IconView) GetModel() *TreeModel {
+	return &TreeModel{C.gtk_icon_view_get_model(ICON_VIEW(v))}
+}
+
+func (v *IconView) SetModel(model ITreeModel) {
+	var tm *C.GtkTreeModel
+	if model != nil {
+		tm = model.cTreeModel()
+	}
+	C.gtk_icon_view_set_model(
+		ICON_VIEW(v), 
+		tm
+	)
+}
+
+func (v *IconView) GetTextColumn() int {
+	return int(C.gtk_icon_view_get_text_column(ICON_VIEW(v)))
+}
+
+func (v *IconView) SetTextColumn(text_column int) {
+	C.gtk_icon_view_set_text_column(
+		ICON_VIEW(v), 
+		gint(text_column)
+	)
+}
+
+func (v *IconView) GetMarkupColumn() int {
+	return int(C.gtk_icon_view_get_markup_column(ICON_VIEW(v)))
+}
+
+func (v *IconView) SetMarkupColumn(markup_column int) {
+	C.gtk_icon_view_set_markup_column(
+		ICON_VIEW(v), 
+		gint(markup_column)
+	)
+}
+
+func (v *IconView) GetPixbufColumn() int {
+	return int(C.gtk_icon_view_get_pixbuf_column(ICON_VIEW(v)))
+}
+
+func (v *IconView) SetPixbufColumn(pixbuf_column int) {
+	C.gtk_icon_view_set_pixbuf_column(
+		ICON_VIEW(v), 
+		gint(pixbuf_column)
+	)
+}
+
+func (v *IconView) ScrollToPath(path *TreePath, use bool, ra float64, ca float64) {
+	C.gtk_icon_view_scroll_to_path(
+		ICON_VIEW(v), 
+		path.GTreePath,
+		gbool(use), 
+		C.gfloat(ra), 
+		C.gfloat(ca)
+	)
+}
+
+// gtkCellRenderer
+type ICellRenderer interface {
+	ToCellRenderer() *C.GtkCellRenderer
+}
+
+type CellRenderer struct {
+	GCellRenderer *C.GtkCellRenderer
+	ICellRenderer
+}
+
+func (v *CellRenderer) ToCellRenderer() *C.GtkCellRenderer {
+	return v.GCellRenderer
+}
+
+func (v *CellRenderer) Connect(s string, f interface{}, datas ...interface{}) int {
+	return glib.ObjectFromNative(unsafe.Pointer(v.GCellRenderer)).Connect(s, f, datas...)
+}
+
+// gtkCellRendererAccel
+type CellRendererAccel struct {
+	CellRenderer
+}
+
+func NewCellRendererAccel() *CellRendererAccel {
+	return &CellRendererAccel{CellRenderer{C.gtk_cell_renderer_accel_new(), nil}}
+}
+
+// gtkCellRendererCombo
+type CellRendererCombo struct {
+	CellRenderer
+}
+
+func NewCellRendererCombo() *CellRendererCombo {
+	return &CellRendererCombo{CellRenderer{C.gtk_cell_renderer_combo_new(), nil}}
+}
+
+// gtkCellRendererPixbuf
+type CellRendererPixbuf struct {
+	CellRenderer
+}
+
+func NewCellRendererPixbuf() *CellRendererPixbuf {
+	return &CellRendererPixbuf{CellRenderer{C.gtk_cell_renderer_pixbuf_new(), nil}}
+}
+
+// gtkCellRendererProgress
+type CellRendererProgress struct {
+	CellRenderer
+}
+
+func NewCellRendererProgress() *CellRendererProgress {
+	return &CellRendererProgress{CellRenderer{C.gtk_cell_renderer_progress_new(), nil}}
+}
+
+// gtkCellRendererSpin
+type CellRendererSpin struct {
+	CellRenderer
+}
+
+func NewCellRendererSpin() *CellRendererSpin {
+	return &CellRendererSpin{CellRenderer{C.gtk_cell_renderer_spin_new(), nil}}
+}
+
+// gtkCellRendererText
+type CellRendererText struct {
+	CellRenderer
+}
+
+func NewCellRendererText() *CellRendererText {
+	return &CellRendererText{CellRenderer{C.gtk_cell_renderer_text_new(), nil}}
+}
+func (v *CellRendererText) SetFixedHeightFromFont(number_of_rows int) {
+	C.gtk_cell_renderer_text_set_fixed_height_from_font(
+		CELL_RENDERER_TEXT(v), 
+		gint(number_of_rows)
+	)
+}
+
+// gtkCellRendererToggle
+type CellRendererToggle struct {
+	CellRenderer
+}
+
+func NewCellRendererToggle() *CellRendererToggle {
+	return &CellRendererToggle{CellRenderer{C.gtk_cell_renderer_toggle_new(), nil}}
+}
+
+func (v *CellRendererToggle) GetRadio() bool {
+	return gobool(C.gtk_cell_renderer_toggle_get_radio(CELL_RENDERER_TOGGLE(v)))
+}
+
+func (v *CellRendererToggle) SetRadio(radio bool) {
+	C.gtk_cell_renderer_toggle_set_radio(
+		CELL_RENDERER_TOGGLE(v), 
+		gbool(radio)
+	)
+}
+
+func (v *CellRendererToggle) GetActive() bool {
+	return gobool(C.gtk_cell_renderer_toggle_get_active(CELL_RENDERER_TOGGLE(v)))
+}
+
+func (v *CellRendererToggle) SetActive(active bool) {
+	C.gtk_cell_renderer_toggle_set_active(
+		CELL_RENDERER_TOGGLE(v), 
+		gbool(active)
+	)
+}
+
+func (v *CellRendererToggle) GetActivatable() bool {
+	panic_if_version_older(2, 18, 0, "gtk_cell_renderer_toggle_get_activatable()")
+	return gobool(C._gtk_cell_renderer_toggle_get_activatable(CELL_RENDERER_TOGGLE(v)))
+}
+
+func (v *CellRendererToggle) SetActivatable(activatable bool) {
+	panic_if_version_older(2, 18, 0, "gtk_cell_renderer_toggle_set_activatable()")
+	C._gtk_cell_renderer_toggle_set_activatable(
+		CELL_RENDERER_TOGGLE(v), 
+		gbool(activatable)
+	)
+}
+
+// gtkCellRendererSpinner
+type CellRendererSpinner struct {
+	CellRenderer
+}
+
+func NewCellRendererSpinner() *CellRendererSpinner {
+	panic_if_version_older(2, 20, 0, "gtk_cell_renderer_spinner_new()")
+	return &CellRendererSpinner{CellRenderer{C._gtk_cell_renderer_spinner_new(), nil}}
+}
+
+// gtkListStore
+const (
+	TYPE_CHAR    = glib.G_TYPE_CHAR
+	TYPE_UCHAR   = glib.G_TYPE_UCHAR
+	TYPE_BOOL    = glib.G_TYPE_BOOL
+	TYPE_INT     = glib.G_TYPE_INT
+	TYPE_UINT    = glib.G_TYPE_UINT
+	TYPE_LONG    = glib.G_TYPE_LONG
+	TYPE_ULONG   = glib.G_TYPE_ULONG
+	TYPE_FLOAT   = glib.G_TYPE_FLOAT
+	TYPE_DOUBLE  = glib.G_TYPE_DOUBLE
+	TYPE_STRING  = glib.G_TYPE_STRING
+	TYPE_BOXED   = glib.G_TYPE_BOXED
+	TYPE_POINTER = glib.G_TYPE_POINTER
+	TYPE_PIXBUF  = TYPE_POINTER
+)
+
+type ListStore struct {
+	TreeModel
+	GListStore *C.GtkListStore
+}
+
+func NewListStore(v ...interface{}) *ListStore {
+	types := C.make_gtypes(C.int(len(v)))
+	for n := range v {
+		C.set_gtype(
+			types, 
+			C.int(n), 
+			C.int(v[n].(int))
+		)
+	}
+	defer C.destroy_gtypes(types)
+	cliststore := C.gtk_list_store_newv(gint(len(v)), types)
+	return &ListStore{TreeModel{C.toGTreeModelFromListStore(cliststore)}, cliststore}
+}
+
+func (v *ListStore) Set(iter *TreeIter, a ...interface{}) {
+	for r := range a {
+		v.SetValue(iter, r, a[r])
+	}
+}
+
+func (v *ListStore) SetValue(iter *TreeIter, column int, a interface{}) {
+	gv := glib.GValueFromNative(a)
+	if gv != nil {
+		C.gtk_list_store_set_value(
+			v.GListStore, 
+			&iter.GTreeIter, 
+			gint(column), 
+			C.toGValue(unsafe.Pointer(gv))
+		)
+	} else {
+		if pv, ok := a.(*[0]uint8); ok {
+			C._gtk_list_store_set_ptr(
+				v.GListStore, 
+				&iter.GTreeIter, 
+				gint(column), 
+				unsafe.Pointer(pv)
+			)
+		} else {
+			av := reflect.ValueOf(a)
+			if av.CanAddr() {
+				C._gtk_list_store_set_addr(
+					v.GListStore, 
+					&iter.GTreeIter, 
+					gint(column), 
+					unsafe.Pointer(av.UnsafeAddr())
+				)
+			} else {
+				C._gtk_list_store_set_addr(
+					v.GListStore, 
+					&iter.GTreeIter, 
+					gint(column), 
+					unsafe.Pointer(&a)
+				)
+			}
+		}
+	}
+}
+
+func (v *ListStore) Remove(iter *TreeIter) bool {
+	return gobool(C.gtk_list_store_remove(v.GListStore, &iter.GTreeIter))
+}
+
+func (v *ListStore) Insert(iter *TreeIter, position int) {
+	C.gtk_list_store_insert(
+		v.GListStore, 
+		&iter.GTreeIter, 
+		gint(position)
+	)
+}
+
+func (v *ListStore) InsertBefore(iter *TreeIter, sibling *TreeIter) {
+	C.gtk_list_store_insert_before(
+		v.GListStore, 
+		&iter.GTreeIter, 
+		&sibling.GTreeIter
+	)
+}
+
+func (v *ListStore) InsertAfter(iter *TreeIter, sibling *TreeIter) {
+	C.gtk_list_store_insert_after(
+		v.GListStore, 
+		&iter.GTreeIter, 
+		&sibling.GTreeIter
+	)
+}
+
+func (v *ListStore) Prepend(iter *TreeIter) {
+	C.gtk_list_store_prepend(
+		v.GListStore, 
+		&iter.GTreeIter
+	)
+}
+
+func (v *ListStore) Append(iter *TreeIter) {
+	C.gtk_list_store_append(
+		v.GListStore, 
+		&iter.GTreeIter
+	)
+}
+
+func (v *ListStore) Clear() {
+	C.gtk_list_store_clear(v.GListStore)
+}
+
+func (v *ListStore) IterIsValid(iter *TreeIter) bool {
+	log.Println("Attention: ListStore.IterIsValid: You should only use this function for debugging or testing stages.")
+	return gobool(C.gtk_list_store_iter_is_valid(v.GListStore, &iter.GTreeIter))
+}
+
+func (v *ListStore) Reorder(i *int) {
+	gi := gint(*i)
+	C.gtk_list_store_reorder(v.GListStore, &gi)
+	*i = int(gi)
+}
+
+func (v *ListStore) Swap(a *TreeIter, b *TreeIter) {
+	C.gtk_list_store_swap(v.GListStore, &a.GTreeIter, &b.GTreeIter)
+}
+
+func (v *ListStore) MoveBefore(iter *TreeIter, position *TreeIter) {
+	C.gtk_list_store_move_before(
+		v.GListStore, 
+		&iter.GTreeIter, 
+		&position.GTreeIter
+	)
+}
+
+func (v *ListStore) MoveAfter(iter *TreeIter, position *TreeIter) {
+	C.gtk_list_store_move_after(
+		v.GListStore, 
+		&iter.GTreeIter, 
+		&position.GTreeIter
+	)
+}
+
+// gtkTreeStore
+type TreeStore struct {
+	TreeModel
+	GTreeStore *C.GtkTreeStore
+}
+
+func NewTreeStore(v ...interface{}) *TreeStore {
+	types := C.make_gtypes(C.int(len(v)))
+	for n := range v {
+		C.set_gtype(types, C.int(n), C.int(v[n].(int)))
+	}
+	defer C.destroy_gtypes(types)
+	ctreestore := C.gtk_tree_store_newv(gint(len(v)), types)
+	return &TreeStore{TreeModel{C.toGTreeModelFromTreeStore(ctreestore)}, ctreestore}
+}
+
+func (v *TreeStore) Set(iter *TreeIter, a ...interface{}) {
+	for r := range a {
+		v.SetValue(iter, r, a[r])
+	}
+}
+
+func (v *TreeStore) SetValue(iter *TreeIter, column int, a interface{}) {
+	gv := glib.GValueFromNative(a)
+	if gv != nil {
+		C.gtk_tree_store_set_value(
+			v.GTreeStore, 
+			&iter.GTreeIter, 
+			gint(column), 
+			C.toGValue(unsafe.Pointer(gv))
+		)
+	} else {
+		if pv, ok := a.(*[0]uint8); ok {
+			C._gtk_tree_store_set_ptr(
+				v.GTreeStore, 
+				&iter.GTreeIter, 
+				gint(column), 
+				unsafe.Pointer(pv)
+			)
+		} else {
+			av := reflect.ValueOf(a)
+			if av.CanAddr() {
+				C._gtk_tree_store_set_addr(
+					v.GTreeStore, 
+					&iter.GTreeIter, 
+					gint(column), 
+					unsafe.Pointer(av.UnsafeAddr())
+				)
+			} else {
+				C._gtk_tree_store_set_addr(
+					v.GTreeStore, 
+					&iter.GTreeIter, 
+					gint(column), 
+					unsafe.Pointer(&a)
+				)
+			}
+		}
+	}
+}
+
+func (v *TreeStore) Remove(iter *TreeIter) bool {
+	return gobool(C.gtk_tree_store_remove(v.GTreeStore, &iter.GTreeIter))
+}
+
+func (v *TreeStore) Insert(iter *TreeIter, parent *TreeIter, position int) {
+	C.gtk_tree_store_insert(
+		v.GTreeStore, 
+		&iter.GTreeIter, 
+		&parent.GTreeIter, 
+		gint(position)
+	)
+}
+
+func (v *TreeStore) InsertBefore(iter *TreeIter, parent *TreeIter, sibling *TreeIter) {
+	C.gtk_tree_store_insert_before(
+		v.GTreeStore, 
+		&iter.GTreeIter, 
+		&parent.GTreeIter, 
+		&sibling.GTreeIter
+	)
+}
+
+func (v *TreeStore) InsertAfter(iter *TreeIter, parent *TreeIter, sibling *TreeIter) {
+	C.gtk_tree_store_insert_after(
+		v.GTreeStore, 
+		&iter.GTreeIter, 
+		&parent.GTreeIter, 
+		&sibling.GTreeIter
+	)
+}
+
+func (v *TreeStore) Prepend(iter *TreeIter, parent *TreeIter) {
+	if parent == nil {
+		C.gtk_tree_store_prepend(
+			v.GTreeStore, 
+			&iter.GTreeIter, 
+			nil
+		)
+	} else {
+		C.gtk_tree_store_prepend(
+			v.GTreeStore, 
+			&iter.GTreeIter, 
+			&parent.GTreeIter
+		)
+	}
+}
+
+func (v *TreeStore) Append(iter *TreeIter, parent *TreeIter) {
+	if parent == nil {
+		C.gtk_tree_store_append(
+			v.GTreeStore, 
+			&iter.GTreeIter, 
+			nil
+		)
+	} else {
+		C.gtk_tree_store_append(
+			v.GTreeStore, 
+			&iter.GTreeIter, 
+			&parent.GTreeIter
+		)
+	}
+}
+
+func (v *TreeStore) ToTreeModel() *TreeModel {
+	return &TreeModel{C.toGTreeModelFromTreeStore(v.GTreeStore)}
+}
+
+func (v *TreeStore) IterDepth(iter *TreeIter) int {
+	return int(C.gtk_tree_store_iter_depth(v.GTreeStore, &iter.GTreeIter))
+}
+
+func (v *TreeStore) Clear() {
+	C.gtk_tree_store_clear(v.GTreeStore)
+}
+
+func (v *TreeStore) IterIsValid(iter *TreeIter) bool {
+	log.Println("Attention: TreeStore.IterIsValid: You should only use this function for debugging or testing stages.")
+	return gobool(C.gtk_tree_store_iter_is_valid(v.GTreeStore, &iter.GTreeIter))
+}
+
+func (v *TreeStore) Reorder(iter *TreeIter, i *int) {
+	gi := gint(*i)
+	C.gtk_tree_store_reorder(
+		v.GTreeStore, 
+		&iter.GTreeIter, 
+		&gi
+	)
+	*i = int(gi)
+}
+
+func (v *TreeStore) Swap(a *TreeIter, b *TreeIter) {
+	C.gtk_tree_store_swap(
+		v.GTreeStore, 
+		&a.GTreeIter, 
+		&b.GTreeIter
+	)
+}
+
+func (v *TreeStore) MoveBefore(iter *TreeIter, position *TreeIter) {
+	C.gtk_tree_store_move_before(
+		v.GTreeStore, 
+		&iter.GTreeIter, 
+		&position.GTreeIter
+	)
+}
+
+func (v *TreeStore) MoveAfter(iter *TreeIter, position *TreeIter) {
+	C.gtk_tree_store_move_after(
+		v.GTreeStore, 
+		&iter.GTreeIter, 
+		&position.GTreeIter
+	)
+}
+
+// gtkComboBox
+type ComboBox struct {
+	Bin
+}
+
+func NewComboBox() *ComboBox {
+	return &ComboBox{Bin{Container{Widget{C.gtk_combo_box_new()}}}}
+}
+
+func NewComboBoxWithEntry() *ComboBox {
+	deprecated_since(2, 24, 0, "gtk_combo_box_new_with_entry()")
+	return &ComboBox{Bin{Container{Widget{C._gtk_combo_box_new_with_entry()}}}}
+}
+
+func NewComboBoxWithModel(model *TreeModel) *ComboBox {
+	return &ComboBox{Bin{Container{Widget{C.gtk_combo_box_new_with_model(model.GTreeModel)}}}}
+}
+
+func NewComboBoxWithModelAndEntry(model *TreeModel) *ComboBox {
+	deprecated_since(2, 24, 0, "gtk_combo_box_new_with_model_and_entry()")
+	return &ComboBox{Bin{Container{Widget{C._gtk_combo_box_new_with_model_and_entry(model.GTreeModel)}}}}
+}
+
+func (v *ComboBox) GetWrapWidth() int {
+	return int(C.gtk_combo_box_get_wrap_width(COMBO_BOX(v)))
+}
+
+func (v *ComboBox) SetWrapWidth(width int) {
+	C.gtk_combo_box_set_wrap_width(
+		COMBO_BOX(v), 
+		gint(width)
+	)
+}
+
+func (v *ComboBox) GetRowSpanColumn() int {
+	return int(C.gtk_combo_box_get_row_span_column(COMBO_BOX(v)))
+}
+
+func (v *ComboBox) SetRowSpanColumn(row_span int) {
+	C.gtk_combo_box_set_row_span_column(
+		COMBO_BOX(v), 
+		gint(row_span)
+	)
+}
+
+func (v *ComboBox) GetColumnSpanColumn() int {
+	return int(C.gtk_combo_box_get_column_span_column(COMBO_BOX(v)))
+}
+
+func (v *ComboBox) SetColumnSpanColumn(column_span int) {
+	C.gtk_combo_box_set_column_span_column(
+		COMBO_BOX(v), 
+		gint(column_span)
+	)
+}
+
+func (v *ComboBox) GetActive() int {
+	return int(C.gtk_combo_box_get_active(COMBO_BOX(v)))
+}
+
+func (v *ComboBox) SetActive(width int) {
+	C.gtk_combo_box_set_active(
+		COMBO_BOX(v), 
+		gint(width)
+	)
+}
+
+func (v *ComboBox) GetActiveIter(iter *TreeIter) bool {
+	return gobool(C.gtk_combo_box_get_active_iter(COMBO_BOX(v), &iter.GTreeIter))
+}
+
+func (v *ComboBox) SetActiveIter(iter *TreeIter) {
+	C.gtk_combo_box_set_active_iter(
+		COMBO_BOX(v), 
+		&iter.GTreeIter
+	)
+}
+
+func (v *ComboBox) GetModel() *TreeModel {
+	return &TreeModel{
+		C.gtk_combo_box_get_model(COMBO_BOX(v))}
+}
+
+func (v *ComboBox) SetModel(model *TreeModel) {
+	C.gtk_combo_box_set_model(
+		COMBO_BOX(v), 
+		model.GTreeModel
+	)
+}
+
+func NewComboBoxNewText() *ComboBox {
+	deprecated_since(2, 24, 0, "gtk_combo_box_new_text()")
+	return &ComboBox{Bin{Container{Widget{C.gtk_combo_box_new_text()}}}}
+}
+
+func (v *ComboBox) AppendText(text string) {
+	deprecated_since(2, 24, 0, "gtk_combo_box_append_text()")
+	ptr := C.CString(text)
+	defer cfree(ptr)
+	C.gtk_combo_box_append_text(
+		COMBO_BOX(v), 
+		gstring(ptr)
+	)
+}
+
+func (v *ComboBox) InsertText(text string, position int) {
+	deprecated_since(2, 24, 0, "gtk_combo_box_insert_text()")
+	ptr := C.CString(text)
+	defer cfree(ptr)
+	C.gtk_combo_box_insert_text(
+		COMBO_BOX(v), 
+		gint(position), 
+		gstring(ptr)
+	)
+}
+
+func (v *ComboBox) PrependText(text string) {
+	deprecated_since(2, 24, 0, "gtk_combo_box_prepend_text()")
+	ptr := C.CString(text)
+	defer cfree(ptr)
+	C.gtk_combo_box_prepend_text(
+		COMBO_BOX(v), 
+		gstring(ptr)
+	)
+}
+
+func (v *ComboBox) RemoveText(position int) {
+	deprecated_since(2, 24, 0, "gtk_combo_box_remove_text()")
+	C.gtk_combo_box_remove_text(
+		COMBO_BOX(v), 
+		gint(position)
+	)
+}
+
+func (v *ComboBox) GetActiveText() string {
+	deprecated_since(2, 24, 0, "gtk_combo_box_get_active_text()")
+	return gostring(C.gtk_combo_box_get_active_text(COMBO_BOX(v)))
+}
+
+func (v *ComboBox) Popup() {
+	C.gtk_combo_box_popup(COMBO_BOX(v))
+}
+
+func (v *ComboBox) Popdown() {
+	C.gtk_combo_box_popdown(COMBO_BOX(v))
+}
+
+func (v *ComboBox) SetAddTearoffs(add_tearoffs bool) {
+	C.gtk_combo_box_set_add_tearoffs(
+		COMBO_BOX(v), 
+		gbool(add_tearoffs)
+	)
+}
+
+func (v *ComboBox) GetAddTearoffs() bool {
+	return gobool(C.gtk_combo_box_get_add_tearoffs(COMBO_BOX(v)))
+}
+
+func (v *ComboBox) SetTitle(title string) {
+	ptr := C.CString(title)
+	defer cfree(ptr)
+	C.gtk_combo_box_set_title(
+		COMBO_BOX(v), 
+		gstring(ptr)
+	)
+}
+
+func (v *ComboBox) GetTitle() string {
+	return gostring(C.gtk_combo_box_get_title(COMBO_BOX(v)))
+}
+
+func (v *ComboBox) SetFocusOnClick(focus_on_click bool) {
+	C.gtk_combo_box_set_focus_on_click(
+		COMBO_BOX(v), 
+		gbool(focus_on_click)
+	)
+}
+
+func (v *ComboBox) GetFocusOnClick() bool {
+	return gobool(C.gtk_combo_box_get_focus_on_click(COMBO_BOX(v)))
+}
+
+// gtkComboBoxText
+type ComboBoxText struct {
+	ComboBox
+}
+
+func NewComboBoxText() *ComboBoxText {
+	return &ComboBoxText{ComboBox{Bin{Container{Widget{C._gtk_combo_box_text_new()}}}}}
+}
+
+func NewComboBoxTextWithEntry() *ComboBoxText {
+	return &ComboBoxText{ComboBox{Bin{Container{Widget{C._gtk_combo_box_text_new_with_entry()}}}}}
+}
+
+func (v *ComboBoxText) AppendText(text string) {
+	ptr := C.CString(text)
+	defer cfree(ptr)
+	C._gtk_combo_box_text_append_text(
+		COMBO_BOX_TEXT(v), 
+		gstring(ptr)
+	)
+}
+
+func (v *ComboBoxText) InsertText(position int, text string) {
+	ptr := C.CString(text)
+	defer cfree(ptr)
+	C._gtk_combo_box_text_insert_text(
+		COMBO_BOX_TEXT(v), 
+		gint(position), 
+		gstring(ptr)
+	)
+}
+
+func (v *ComboBoxText) PrependText(text string) {
+	ptr := C.CString(text)
+	defer cfree(ptr)
+	C._gtk_combo_box_text_prepend_text(
+		COMBO_BOX_TEXT(v), 
+		gstring(ptr)
+	)
+}
+
+func (v *ComboBoxText) Remove(position int) {
+	C._gtk_combo_box_text_remove(
+		COMBO_BOX_TEXT(v), 
+		gint(position)
+	)
+}
+
+func (v *ComboBoxText) GetActiveText() string {
+	return gostring(C._gtk_combo_box_text_get_active_text(COMBO_BOX_TEXT(v)))
+}
+
+// gtkComboBoxEntry
+type ComboBoxEntry struct {
+	ComboBox
+}
+
+func NewComboBoxEntry() *ComboBoxEntry {
+	deprecated_since(2, 24, 0, "gtk_combo_box_entry_new()")
+	return &ComboBoxEntry{ComboBox{Bin{Container{Widget{C.gtk_combo_box_entry_new()}}}}}
+}
+
+func NewComboBoxEntryNewText() *ComboBoxEntry {
+	deprecated_since(2, 24, 0, "gtk_combo_box_entry_new_text()")
+	return &ComboBoxEntry{ComboBox{Bin{Container{Widget{C.gtk_combo_box_entry_new_text()}}}}}
+}
+
+func (v *ComboBoxEntry) GetTextColumn() int {
+	deprecated_since(2, 24, 0, "gtk_combo_box_entry_get_text_column()")
+	return int(C.gtk_combo_box_entry_get_text_column(COMBO_BOX_ENTRY(v)))
+}
+
+func (v *ComboBoxEntry) SetTextColumn(text_column int) {
+	deprecated_since(2, 24, 0, "gtk_combo_box_entry_set_text_column()")
+	C.gtk_combo_box_entry_set_text_column(
+		COMBO_BOX_ENTRY(v), 
+		gint(text_column)
+	)
+}
+
+// gtkMenu
+type Menu struct {
+	Container
+}
+
+func NewMenu() *Menu {
+	return &Menu{Container{Widget{C.gtk_menu_new()}}}
+}
+
+func (v *Menu) Append(child IWidget) {
+	C.gtk_menu_shell_append(
+		MENU_SHELL(v), 
+		ToNative(child)
+	)
+}
+
+func (v *Menu) Prepend(child IWidget) {
+	C.gtk_menu_shell_prepend(
+		MENU_SHELL(v), 
+		ToNative(child)
+	)
+}
+
+func (v *Menu) Insert(child IWidget, position int) {
+	C.gtk_menu_shell_insert(
+		MENU_SHELL(v), 
+		ToNative(child), 
+		gint(position)
+	)
+}
+
+func (v *Menu) Popup(parent_menu_shell, parent_menu_item IWidget, f MenuPositionFunc, data interface{}, button uint, active_item uint32) {
+	var pms, pmi *C.GtkWidget
+	if parent_menu_shell != nil {
+		pms = ToNative(parent_menu_shell)
+	}
+	if parent_menu_item != nil {
+		pmi = ToNative(parent_menu_item)
+	}
+	C._gtk_menu_popup(
+		v.GWidget, 
+		pms, 
+		pmi, 
+		unsafe.Pointer(&MenuPositionFuncInfo{v, f, data}), 
+		guint(button), 
+		guint32(active_item)
+	)
+}
+
+func (v *Menu) GetTearoffState() bool {
+	return gobool(C.gtk_menu_get_tearoff_state(MENU(v)))
+}
+
+func (v *Menu) SetReserveToggleSize(b bool) {
+	panic_if_version_older(2, 18, 0, "gtk_menu_set_reserve_toggle_size()")
+	C._gtk_menu_set_reserve_toggle_size(
+		MENU(v), 
+		gbool(b)
+	)
+}
+
+func (v *Menu) GetReserveToggleSize() bool {
+	panic_if_version_older(2, 18, 0, "gtk_menu_get_reserve_toggle_size()")
+	return gobool(C._gtk_menu_get_reserve_toggle_size(MENU(v)))
+}
+
+func (v *Menu) Popdown() {
+	C.gtk_menu_popdown(MENU(v))
+}
+
+func (v *Menu) Reposition() {
+	C.gtk_menu_reposition(MENU(v))
+}
+
+func (v *Menu) GetActive() *Widget {
+	return &Widget{C.gtk_menu_get_active(MENU(v))}
+}
+
+func (v *Menu) SetTearoffState(b bool) {
+	C.gtk_menu_set_tearoff_state(
+		MENU(v), 
+		gbool(b)
+	)
+}
+
+func (v *Menu) Detach() {
+	C.gtk_menu_detach(MENU(v))
+}
+
+func (v *Menu) GetAttachWidget() *Widget {
+	return &Widget{C.gtk_menu_get_attach_widget(MENU(v))}
+}
+
+type MenuPositionFunc func(menu *Menu, px, py *int, push_in *bool, data interface{})
+
+type MenuPositionFuncInfo struct {
+	menu *Menu
+	f    MenuPositionFunc
+	data interface{}
+}
+
+func _go_gtk_menu_position_func(gmpfi *C._gtk_menu_position_func_info) {
+	if gmpfi == nil {
+		return
+	}
+	gmpfigo := (*MenuPositionFuncInfo)(gmpfi.data)
+	if gmpfigo.f == nil {
+		return
+	}
+	x := int(gmpfi.x)
+	y := int(gmpfi.y)
+	push_in := gobool(gmpfi.push_in)
+	gmpfigo.f(gmpfigo.menu, &x, &y, &push_in, gmpfigo.data)
+	gmpfi.x = gint(x)
+	gmpfi.y = gint(y)
+	gmpfi.push_in = gbool(push_in)
+}
+
+// gtkMenuBar
+type PackDirection int
+
+const (
+	PACK_DIRECTION_LTR PackDirection = 0
+	PACK_DIRECTION_RTL PackDirection = 1
+	PACK_DIRECTION_TTB PackDirection = 2
+	PACK_DIRECTION_BTT PackDirection = 3
+)
+
+type MenuBar struct {
+	Widget
+}
+
+func NewMenuBar() *MenuBar {
+	return &MenuBar{Widget{C.gtk_menu_bar_new()}}
+}
+
+func (v *MenuBar) SetPackDirection(pack_dir PackDirection) {
+	C.gtk_menu_bar_set_pack_direction(
+		MENU_BAR(v), 
+		C.GtkPackDirection(pack_dir)
+	)
+}
+
+func (v *MenuBar) GetPackDirection() PackDirection {
+	return PackDirection(C.gtk_menu_bar_get_pack_direction(MENU_BAR(v)))
+}
+
+func (v *MenuBar) SetChildPackDirection(pack_dir PackDirection) {
+	C.gtk_menu_bar_set_child_pack_direction(
+		MENU_BAR(v), 
+		C.GtkPackDirection(pack_dir)
+	)
+}
+
+func (v *MenuBar) GetChildPackDirection() PackDirection {
+	return PackDirection(C.gtk_menu_bar_get_child_pack_direction(MENU_BAR(v)))
+}
+
+func (v *MenuBar) Append(child IWidget) {
+	C.gtk_menu_shell_append(
+		MENU_BAR_SHELL(v), 
+		ToNative(child)
+	)
+}
+
+func (v *MenuBar) Prepend(child IWidget) {
+	C.gtk_menu_shell_prepend(
+		MENU_BAR_SHELL(v), 
+		ToNative(child)
+	)
+}
+
+func (v *MenuBar) Insert(child IWidget, position int) {
+	C.gtk_menu_shell_insert(
+		MENU_BAR_SHELL(v), 
+		ToNative(child), 
+		gint(position)
+	)
+}
+
+// gtkMenuItem
+type MenuItem struct {
+	Item
+}
+
+func NewMenuItem() *MenuItem {
+	return &MenuItem{Item{Bin{Container{Widget{C.gtk_menu_item_new()}}}}}
+}
+
+func NewMenuItemWithLabel(label string) *MenuItem {
+	ptr := C.CString(label)
+	defer cfree(ptr)
+	return &MenuItem{Item{Bin{Container{Widget{
+		C.gtk_menu_item_new_with_label(gstring(ptr))}}}}}
+}
+
+func NewMenuItemWithMnemonic(label string) *MenuItem {
+	ptr := C.CString(label)
+	defer cfree(ptr)
+	return &MenuItem{Item{Bin{Container{Widget{
+		C.gtk_menu_item_new_with_mnemonic(gstring(ptr))}}}}}
+}
+
+func (v *MenuItem) SetRightJustified(b bool) {
+	C.gtk_menu_item_set_right_justified(
+		MENU_ITEM(v), 
+		gbool(b)
+	)
+}
+
+func (v *MenuItem) GetRightJustified() bool {
+	return gobool(C.gtk_menu_item_get_right_justified(MENU_ITEM(v)))
+}
+
+func (v *MenuItem) GetUseUnderline() bool {
+	return gobool(C.gtk_menu_item_get_use_underline(MENU_ITEM(v)))
+}
+
+func (v *MenuItem) SetUseUnderline(setting bool) {
+	C.gtk_menu_item_set_use_underline(
+		MENU_ITEM(v), 
+		gbool(setting)
+	)
+}
+
+func (v *MenuItem) SetSubmenu(w IWidget) {
+	C.gtk_menu_item_set_submenu(
+		MENU_ITEM(v), 
+		ToNative(w)
+	)
+}
+
+func (v *MenuItem) GetSubmenu() *Widget {
+	return &Widget{C.gtk_menu_item_get_submenu(MENU_ITEM(v))}
+}
+
+func (v *MenuItem) RemoveSubmenu() {
+	deprecated_since(2, 12, 0, "gtk_menu_item_remove_submenu()")
+	C.gtk_menu_item_remove_submenu(MENU_ITEM(v))
+}
+
+func (v *MenuItem) Select() {
+	C.gtk_menu_item_select(MENU_ITEM(v))
+}
+
+func (v *MenuItem) Deselect() {
+	C.gtk_menu_item_deselect(MENU_ITEM(v))
+}
+
+func (v *MenuItem) Activate() {
+	C.gtk_menu_item_activate(MENU_ITEM(v))
+}
+
+func (v *MenuItem) ToggleSizeRequest(i *int) {
+	gi := gint(*i)
+	C.gtk_menu_item_toggle_size_request(
+		MENU_ITEM(v), 
+		&gi
+	)
+	*i = int(gi)
+}
+
+func (v *MenuItem) ToggleSizeAllocate(i int) {
+	C.gtk_menu_item_toggle_size_allocate(
+		MENU_ITEM(v), 
+		gint(i)
+	)
+}
+
+// gtkRadioMenuItem
+type RadioMenuItem struct {
+	CheckMenuItem
+}
+
+func NewRadioMenuItem(group *glib.SList) *RadioMenuItem {
+	return &RadioMenuItem{CheckMenuItem{MenuItem{Item{Bin{Container{Widget{C.gtk_radio_menu_item_new(gslist(group))}}}}}}}
+}
+
+func NewRadioMenuItemWithLabel(group *glib.SList, label string) *RadioMenuItem {
+	ptr := C.CString(label)
+	defer cfree(ptr)
+	return &RadioMenuItem{CheckMenuItem{MenuItem{Item{Bin{Container{Widget{C.gtk_radio_menu_item_new_with_label(gslist(group), gstring(ptr))}}}}}}}
+}
+
+func (v *RadioMenuItem) SetGroup(group *glib.SList) {
+	C.gtk_radio_menu_item_set_group(
+		RADIO_MENU_ITEM(v), 
+		gslist(group)
+	)
+}
+
+func (v *RadioMenuItem) GetGroup() *glib.SList {
+	return glib.SListFromNative(unsafe.Pointer(
+		C.gtk_radio_menu_item_get_group(RADIO_MENU_ITEM(v)))
+	)
+}
+
+// gtkCheckMenuItem
+type CheckMenuItem struct {
+	MenuItem
+}
+
+func NewCheckMenuItem() *CheckMenuItem {
+	return &CheckMenuItem{MenuItem{Item{Bin{Container{Widget{C.gtk_check_menu_item_new()}}}}}}
+}
+
+func NewCheckMenuItemWithLabel(label string) *CheckMenuItem {
+	ptr := C.CString(label)
+	defer cfree(ptr)
+	return &CheckMenuItem{MenuItem{Item{Bin{Container{Widget{C.gtk_check_menu_item_new_with_label(gstring(ptr))}}}}}}
+}
+
+func NewCheckMenuItemWithMnemonic(label string) *CheckMenuItem {
+	ptr := C.CString(label)
+	defer cfree(ptr)
+	return &CheckMenuItem{MenuItem{Item{Bin{Container{Widget{C.gtk_check_menu_item_new_with_mnemonic(gstring(ptr))}}}}}}
+}
+
+func (v *CheckMenuItem) GetActive() bool {
+	return gobool(C.gtk_check_menu_item_get_active(CHECK_MENU_ITEM(v)))
+}
+
+func (v *CheckMenuItem) SetActive(setting bool) {
+	C.gtk_check_menu_item_set_active(
+		CHECK_MENU_ITEM(v), 
+		gbool(setting)
+	)
+}
+
+func (v *CheckMenuItem) Toggled() {
+	C.gtk_check_menu_item_toggled(CHECK_MENU_ITEM(v))
+}
+
+func (v *CheckMenuItem) GetInconsistent() bool {
+	return gobool(C.gtk_check_menu_item_get_inconsistent(CHECK_MENU_ITEM(v)))
+}
+
+func (v *CheckMenuItem) SetInconsistent(setting bool) {
+	C.gtk_check_menu_item_set_inconsistent(
+		CHECK_MENU_ITEM(v), 
+		gbool(setting)
+	)
+}
+
+func (v *CheckMenuItem) SetDrawAsRadio(setting bool) {
+	C.gtk_check_menu_item_set_draw_as_radio(
+		CHECK_MENU_ITEM(v), 
+		gbool(setting)
+	)
+}
+
+func (v *CheckMenuItem) GetDrawAsRadio() bool {
+	return gobool(C.gtk_check_menu_item_get_draw_as_radio(CHECK_MENU_ITEM(v)))
+}
+
+// gtkSeparatorMenuItem
+type SeparatorMenuItem struct {
+	MenuItem
+}
+
+func NewSeparatorMenuItem() *SeparatorMenuItem {
+	return &SeparatorMenuItem{MenuItem{Item{Bin{Container{Widget{C.gtk_separator_menu_item_new()}}}}}}
+}
+
+// gtkTearoffMenuItem
+type TearoffMenuItem struct {
+	MenuItem
+}
+
+func NewTearoffMenuItem() *TearoffMenuItem {
+	return &TearoffMenuItem{MenuItem{Item{Bin{Container{Widget{C.gtk_tearoff_menu_item_new()}}}}}}
+}
+
+// gtkToolbar
+
+type Orientation int
+
+const (
+	ORIENTATION_HORIZONTAL = 0
+	ORIENTATION_VERTICAL   = 1
+)
+
+type ToolbarStyle int
+
+const (
+	TOOLBAR_ICONS      = 0
+	TOOLBAR_TEXT       = 1
+	TOOLBAR_BOTH       = 2
+	TOOLBAR_BOTH_HORIZ = 3
+)
+
+type Toolbar struct {
+	Container
+	items map[*C.GtkToolItem]IWidget
+}
+
+func NewToolbar() *Toolbar {
+	return &Toolbar{Container{Widget{C.gtk_toolbar_new()}}, make(map[*C.GtkToolItem]IWidget)}
+}
+
+func (v *Toolbar) OnFocusHomeOrEnd(onclick interface{}, datas ...interface{}) int {
+	return v.Connect("focus-home-or-end", onclick, datas...)
+}
+
+func (v *Toolbar) OnOrientationChanged(onclick interface{}, datas ...interface{}) int {
+	return v.Connect("orientation-changed", onclick, datas...)
+}
+
+func (v *Toolbar) OnPopupContextMenu(onclick interface{}, datas ...interface{}) int {
+	return v.Connect("popup-context-menu", onclick, datas...)
+}
+
+func (v *Toolbar) OnStyleChanged(onclick interface{}, datas ...interface{}) int {
+	return v.Connect("style-changed", onclick, datas...)
+}
+
+func (v *Toolbar) Insert(item IWidget, pos int) {
+	p_tool_item := C.toGToolItem(ToNative(item))
+	v.items[p_tool_item] = item
+	C.gtk_toolbar_insert(TOOLBAR(v), p_tool_item, gint(pos))
+}
+
+func (v *Toolbar) GetItemIndex(item IWidget) int {
+	return int(C.gtk_toolbar_get_item_index(TOOLBAR(v), C.toGToolItem(ToNative(item))))
+}
+
+func (v *Toolbar) GetNItems() int {
+	return int(C.gtk_toolbar_get_n_items(TOOLBAR(v)))
+}
+
+func (v *Toolbar) GetNthItem(n int) IWidget {
+	p_tool_item := C.gtk_toolbar_get_nth_item(TOOLBAR(v), gint(n))
+	if p_tool_item == nil {
+		panic("Toolbar.GetNthItem: index out of bounds")
+	}
+	if _, ok := v.items[p_tool_item]; !ok {
+		panic("Toolbar.GetNthItem: interface not found in map")
+	}
+	return v.items[p_tool_item]
+}
+
+func (v *Toolbar) GetDropIndex(x, y int) int {
+	return int(C.gtk_toolbar_get_drop_index(TOOLBAR(v), gint(x), gint(y)))
+}
+
+func (v *Toolbar) SetDropHighlightItem(item IWidget, index int) {
+	C.gtk_toolbar_set_drop_highlight_item(
+		TOOLBAR(v), 
+		C.toGToolItem(ToNative(item)), 
+		gint(index)
+	)
+}
+
+func (v *Toolbar) SetShowArrow(show_arrow bool) {
+	C.gtk_toolbar_set_show_arrow(
+		TOOLBAR(v), 
+		gbool(show_arrow)
+	)
+}
+
+func (v *Toolbar) SetOrientation(orientation Orientation) {
+	C.gtk_toolbar_set_orientation(
+		TOOLBAR(v), 
+		C.GtkOrientation(orientation)
+	)
+}
+
+func (v *Toolbar) SetTooltips(enable bool) {
+	C.gtk_toolbar_set_tooltips(
+		TOOLBAR(v), 
+		gbool(enable)
+	)
+}
+
+func (v *Toolbar) UnsetIconSize() {
+	C.gtk_toolbar_unset_icon_size(TOOLBAR(v))
+}
+
+func (v *Toolbar) GetShowArrow() bool {
+	return gobool(C.gtk_toolbar_get_show_arrow(TOOLBAR(v)))
+}
+
+func (v *Toolbar) GetOrientation() Orientation {
+	return Orientation(C.gtk_toolbar_get_orientation(TOOLBAR(v)))
+}
+
+func (v *Toolbar) GetStyle() ToolbarStyle {
+	return ToolbarStyle(C.gtk_toolbar_get_style(TOOLBAR(v)))
+}
+
+func (v *Toolbar) GetIconSize() IconSize {
+	return IconSize(C.gtk_toolbar_get_icon_size(TOOLBAR(v)))
+}
+
+func (v *Toolbar) GetTooltips() bool {
+	return gobool(C.gtk_toolbar_get_tooltips(TOOLBAR(v)))
+}
+
+func (v *Toolbar) GetReliefStyle() ReliefStyle {
+	return ReliefStyle(C.gtk_toolbar_get_relief_style(TOOLBAR(v)))
+}
+
+func (v *Toolbar) SetStyle(style ToolbarStyle) {
+	C.gtk_toolbar_set_style(
+		TOOLBAR(v), 
+		C.GtkToolbarStyle(style)
+	)
+}
+
+func (v *Toolbar) SetIconSize(icon_size IconSize) {
+	C.gtk_toolbar_set_icon_size(
+		TOOLBAR(v), 
+		C.GtkIconSize(icon_size)
+	)
+}
+
+func (v *Toolbar) UnsetStyle() {
+	C.gtk_toolbar_unset_style(TOOLBAR(v))
+}
+
+// gtkToolItem
+type ToolItem struct {
+	Bin
+}
+
+func NewToolItem() *ToolItem {
+	return &ToolItem{Bin{Container{Widget{C.toGWidget(unsafe.Pointer(C.gtk_tool_item_new()))}}}}
+}
+
+func (v *ToolItem) OnCreateMenuProxy(onclick interface{}, datas ...interface{}) int {
+	return v.Connect("create-menu-proxy", onclick, datas...)
+}
+
+func (v *ToolItem) OnSetTooltip(onclick interface{}, datas ...interface{}) int {
+	return v.Connect("set-tooltip", onclick, datas...)
+}
+
+func (v *ToolItem) OnToolbarReconfigured(onclick interface{}, datas ...interface{}) int {
+	return v.Connect("toolbar-reconfigured", onclick, datas...)
+}
+
+func (v *ToolItem) SetHomogeneous(homogeneous bool) {
+	C.gtk_tool_item_set_homogeneous(
+		TOOL_ITEM(v), 
+		gbool(homogeneous)
+	)
+}
+
+func (v *ToolItem) GetHomogeneous() bool {
+	return gobool(C.gtk_tool_item_get_homogeneous(TOOL_ITEM(v)))
+}
+
+func (v *ToolItem) SetExpand(expand bool) {
+	C.gtk_tool_item_set_expand(
+		TOOL_ITEM(v), 
+		gbool(expand)
+	)
+}
+
+func (v *ToolItem) GetExpand() bool {
+	return gobool(C.gtk_tool_item_get_expand(TOOL_ITEM(v)))
+}
+
+func (v *ToolItem) SetArrowTooltipText(text string) {
+	pt := C.CString(text)
+	defer cfree(pt)
+	C.gtk_tool_item_set_tooltip_text(
+		TOOL_ITEM(v), 
+		gstring(pt)
+	)
+}
+
+func (v *ToolItem) SetArrowTooltipMarkup(markup string) {
+	pm := C.CString(markup)
+	defer cfree(pm)
+	C.gtk_tool_item_set_tooltip_markup(
+		TOOL_ITEM(v), 
+		gstring(pm)
+	)
+}
+
+func (v *ToolItem) SetTooltipMarkup(markup string) {
+	p_markup := C.CString(markup)
+	defer cfree(p_markup)
+	C.gtk_tool_item_set_tooltip_markup(
+		TOOL_ITEM(v), 
+		gstring(p_markup)
+	)
+}
+
+func (v *ToolItem) GetToolbarStyle() ToolbarStyle {
+	return ToolbarStyle(C.gtk_tool_item_get_toolbar_style(TOOL_ITEM(v)))
+}
+
+func (v *ToolItem) GetReliefStyle() ReliefStyle {
+	return ReliefStyle(C.gtk_tool_item_get_relief_style(TOOL_ITEM(v)))
+}
+
+func (v *ToolItem) GetTextAlignment() float64 {
+	return float64(C.gtk_tool_item_get_text_alignment(TOOL_ITEM(v)))
+}
+
+func (v *ToolItem) GetTextOrientation() Orientation {
+	return Orientation(C.gtk_tool_item_get_text_orientation(TOOL_ITEM(v)))
+}
+
+func (v *ToolItem) RebuildMenu() {
+	C.gtk_tool_item_rebuild_menu(TOOL_ITEM(v))
+}
+
+// gtkToolPalette
+type ToolPalette struct {
+	Container
+}
+
+func NewToolPalette() *ToolPalette {
+	return &ToolPalette{Container{Widget{C.gtk_tool_palette_new()}}}
+}
+
+func (v *ToolPalette) GetExclusive(group *ToolItemGroup) bool {
+	return gobool(C.gtk_tool_palette_get_exclusive(TOOL_PALETTE(v), TOOL_ITEM_GROUP(group)))
+}
+
+func (v *ToolPalette) SetExclusive(group *ToolItemGroup, exclusive bool) {
+	C.gtk_tool_palette_set_exclusive(
+		TOOL_PALETTE(v), 
+		TOOL_ITEM_GROUP(group), 
+		gbool(exclusive)
+	)
+}
+
+func (v *ToolPalette) GetExpand(group *ToolItemGroup) bool {
+	return gobool(C.gtk_tool_palette_get_expand(TOOL_PALETTE(v), TOOL_ITEM_GROUP(group)))
+}
+
+func (v *ToolPalette) SetExpand(group *ToolItemGroup, expand bool) {
+	C.gtk_tool_palette_set_expand(
+		TOOL_PALETTE(v), 
+		TOOL_ITEM_GROUP(group), 
+		gbool(expand)
+	)
+}
+
+func (v *ToolPalette) GetGroupPosition(group *ToolItemGroup) int {
+	return int(C.gtk_tool_palette_get_group_position(TOOL_PALETTE(v), TOOL_ITEM_GROUP(group)))
+}
+
+func (v *ToolPalette) SetGroupPosition(group *ToolItemGroup, pos int) {
+	C.gtk_tool_palette_set_group_position(
+		TOOL_PALETTE(v), 
+		TOOL_ITEM_GROUP(group), 
+		gint(pos)
+	)
+}
+
+func (v *ToolPalette) GetIconSize() IconSize {
+	return IconSize(C.gtk_tool_palette_get_icon_size(TOOL_PALETTE(v)))
+}
+
+func (v *ToolPalette) SetIconSize(size IconSize) {
+	C.gtk_tool_palette_set_icon_size(
+		TOOL_PALETTE(v), 
+		C.GtkIconSize(size)
+	)
+}
+
+func (v *ToolPalette) UnsetIconSize() {
+	C.gtk_tool_palette_unset_icon_size(TOOL_PALETTE(v))
+}
+
+func (v *ToolPalette) GetStyle() ToolbarStyle {
+	return ToolbarStyle(C.gtk_tool_palette_get_style(TOOL_PALETTE(v)))
+}
+
+func (v *ToolPalette) SetStyle(style ToolbarStyle) {
+	C.gtk_tool_palette_set_style(
+		TOOL_PALETTE(v), 
+		C.GtkToolbarStyle(style)
+	)
+}
+
+func (v *ToolPalette) UnsetStyle() {
+	C.gtk_tool_palette_unset_style(TOOL_PALETTE(v))
+}
+
+// gtkToolItemGroup
+type ToolItemGroup struct {
+	Container
+	items map[*C.GtkToolItem]IWidget
+}
+
+func NewToolItemGroup(label string) *ToolItemGroup {
+	l := C.CString(label)
+	defer cfree(l)
+	return &ToolItemGroup{Container{Widget{C.gtk_tool_item_group_new(gstring(l))}}, make(map[*C.GtkToolItem]IWidget)}
+}
+
+func (v *ToolItemGroup) Insert(item IWidget, pos int) {
+	pitem := C.toGToolItem(ToNative(item))
+	C.gtk_tool_item_group_insert(
+		TOOL_ITEM_GROUP(v), 
+		pitem, 
+		gint(pos)
+	)
+	v.items[pitem] = item
+}
+
+func (v *ToolItemGroup) GetCollapsed() bool {
+	return gobool(C.gtk_tool_item_group_get_collapsed(TOOL_ITEM_GROUP(v)))
+}
+
+func (v *ToolItemGroup) GetLabel() string {
+	return gostring(C.gtk_tool_item_group_get_label(TOOL_ITEM_GROUP(v)))
+}
+
+func (v *ToolItemGroup) GetHeaderRelief() ReliefStyle {
+	return ReliefStyle(C.gtk_tool_item_group_get_header_relief(TOOL_ITEM_GROUP(v)))
+}
+
+func (v *ToolItemGroup) SetCollapsed(collapsed bool) {
+	C.gtk_tool_item_group_set_collapsed(
+		TOOL_ITEM_GROUP(v), 
+		gbool(collapsed)
+	)
+}
+
+func (v *ToolItemGroup) SetLabel(label string) {
+	l := C.CString(label)
+	defer cfree(l)
+	C.gtk_tool_item_group_set_label(
+		TOOL_ITEM_GROUP(v), 
+		gstring(l)
+	)
+}
+
+func (v *ToolItemGroup) SetHeaderRelief(style ReliefStyle) {
+	C.gtk_tool_item_group_set_header_relief(
+		TOOL_ITEM_GROUP(v), 
+		C.GtkReliefStyle(style)
+	)
+}
+
+// gtkSeparatorToolItem
+type SeparatorToolItem struct {
+	ToolItem
+}
+
+func NewSeparatorToolItem() *SeparatorToolItem {
+	return &SeparatorToolItem{ToolItem{Bin{Container{Widget{C.toGWidget(unsafe.Pointer(C.gtk_separator_tool_item_new()))}}}}}
+}
+
+func (v *SeparatorToolItem) SetDraw(draw bool) {
+	C.gtk_separator_tool_item_set_draw(
+		SEPARATOR_TOOL_ITEM(v), 
+		gbool(draw)
+	)
+}
+
+func (v *SeparatorToolItem) GetDraw() bool {
+	return gobool(C.gtk_separator_tool_item_get_draw(SEPARATOR_TOOL_ITEM(v)))
+}
+
+// gtkToolButton
+type ToolButton struct {
+	ToolItem
+	iw, lw *Widget
+}
+
+func NewToolButton(icon IWidget, text string) *ToolButton {
+	ctext := C.CString(text)
+	defer cfree(ctext)
+	tb := C.toGWidget(unsafe.Pointer(C.gtk_tool_button_new(ToNative(icon), gstring(ctext))))
+	return &ToolButton{ToolItem{Bin{Container{Widget{tb}}}}, nil, nil}
+}
+
+func NewToolButtonFromStock(stock_id string) *ToolButton {
+	si := C.CString(stock_id)
+	defer cfree(si)
+	tb := C.toGWidget(unsafe.Pointer(C.gtk_tool_button_new_from_stock(gstring(si))))
+	return &ToolButton{ToolItem{Bin{Container{Widget{tb}}}}, nil, nil}
+}
+
+func (v *ToolButton) OnClicked(onclick interface{}, datas ...interface{}) int {
+	return v.Connect("clicked", onclick, datas...)
+}
+
+func (v *ToolButton) SetLabel(label string) {
+	p_label := C.CString(label)
+	defer cfree(p_label)
+	C.gtk_tool_button_set_label(
+		TOOL_BUTTON(v), 
+		gstring(p_label)
+	)
+}
+
+func (v *ToolButton) GetLabel() string {
+	return gostring(C.gtk_tool_button_get_label(TOOL_BUTTON(v)))
+}
+
+func (v *ToolButton) SetUseUnderline(use_underline bool) {
+	C.gtk_tool_button_set_use_underline(
+		TOOL_BUTTON(v), 
+		gbool(use_underline)
+	)
+}
+
+func (v *ToolButton) GetUseUnderline() bool {
+	return gobool(C.gtk_tool_button_get_use_underline(TOOL_BUTTON(v)))
+}
+
+func (v *ToolButton) SetStockId(stock_id string) {
+	p_stock_id := C.CString(stock_id)
+	defer cfree(p_stock_id)
+	C.gtk_tool_button_set_stock_id(
+		TOOL_BUTTON(v), 
+		gstring(p_stock_id)
+	)
+}
+
+func (v *ToolButton) GetStockId() string {
+	return gostring(C.gtk_tool_button_get_stock_id(TOOL_BUTTON(v)))
+}
+
+func (v *ToolButton) SetIconName(icon_name string) {
+	p_icon_name := C.CString(icon_name)
+	defer cfree(p_icon_name)
+	C.gtk_tool_button_set_icon_name(
+		TOOL_BUTTON(v), 
+		gstring(p_icon_name)
+	)
+}
+
+func (v *ToolButton) GetIconName() string {
+	return gostring(C.gtk_tool_button_get_icon_name(TOOL_BUTTON(v)))
+}
+
+func (v *ToolButton) SetIconWidget(icon_widget *Widget) {
+	v.iw = icon_widget
+	C.gtk_tool_button_set_icon_widget(
+		TOOL_BUTTON(v), 
+		icon_widget.GWidget
+	)
+}
+
+func (v *ToolButton) GetIconWidget() *Widget {
+	if v.iw == nil {
+		v.iw = &Widget{C.gtk_tool_button_get_icon_widget(TOOL_BUTTON(v))}
+	}
+	return v.iw
+}
+
+func (v *ToolButton) SetLabelWidget(label_widget *Widget) {
+	v.lw = label_widget
+	C.gtk_tool_button_set_label_widget(
+		TOOL_BUTTON(v), 
+		label_widget.GWidget
+	)
+}
+
+func (v *ToolButton) GetLabelWidget() *Widget {
+	if v.lw == nil {
+		v.lw = &Widget{C.gtk_tool_button_get_label_widget(TOOL_BUTTON(v))}
+	}
+	return v.lw
+}
+
+// gtkMenuToolButton
+type MenuToolButton struct {
+	ToolButton
+	mw *Menu
+}
+
+func NewMenuToolButton(icon IWidget, text string) *MenuToolButton {
+	ctext := C.CString(text)
+	defer cfree(ctext)
+	mtb := C.toGWidget(unsafe.Pointer(C.gtk_menu_tool_button_new(ToNative(icon), gstring(ctext))))
+	return &MenuToolButton{ToolButton{ToolItem{Bin{Container{Widget{mtb}}}}, nil, nil}, nil}
+}
+
+func NewMenuToolButtonFromStock(stock_id string) *MenuToolButton {
+	si := C.CString(stock_id)
+	defer cfree(si)
+	mtb := C.toGWidget(unsafe.Pointer(C.gtk_menu_tool_button_new_from_stock(gstring(si))))
+	return &MenuToolButton{ToolButton{ToolItem{Bin{Container{Widget{mtb}}}}, nil, nil}, nil}
+}
+
+func (v *MenuToolButton) SetMenu(menu *Menu) {
+	v.mw = menu
+	C.gtk_menu_tool_button_set_menu(
+		MENU_TOOL_BUTTON(v), 
+		menu.GWidget
+	)
+}
+
+func (v *MenuToolButton) GetMenu() *Menu {
+	if v.mw == nil {
+		v.mw = &Menu{Container{Widget{C.gtk_menu_tool_button_get_menu(MENU_TOOL_BUTTON(v))}}}
+	}
+	return v.mw
+}
+
+func (v *MenuToolButton) SetArrowTooltipText(text string) {
+	pt := C.CString(text)
+	defer cfree(pt)
+	C.gtk_menu_tool_button_set_arrow_tooltip_text(
+		MENU_TOOL_BUTTON(v), 
+		gstring(pt)
+	)
+}
+
+func (v *MenuToolButton) SetArrowTooltipMarkup(markup string) {
+	pm := C.CString(markup)
+	defer cfree(pm)
+	C.gtk_menu_tool_button_set_arrow_tooltip_text(
+		MENU_TOOL_BUTTON(v), 
+		gstring(pm)
+	)
+}
+
