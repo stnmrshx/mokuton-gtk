@@ -6296,3 +6296,851 @@ func (v *MenuToolButton) SetArrowTooltipMarkup(markup string) {
 	)
 }
 
+// gtkToggleToolButton
+type ToggleToolButton struct {
+	ToolButton
+}
+
+func NewToggleToolButton() *ToggleToolButton {
+	return &ToggleToolButton{ToolButton{ToolItem{Bin{Container{Widget{C.toGWidget(unsafe.Pointer(C.gtk_toggle_tool_button_new()))}}}}, nil, nil}}
+}
+
+func NewToggleToolButtonFromStock(stock_id string) *ToggleToolButton {
+	p_stock_id := C.CString(stock_id)
+	defer cfree(p_stock_id)
+	return &ToggleToolButton{ToolButton{ToolItem{Bin{Container{Widget{C.toGWidget(unsafe.Pointer(C.gtk_toggle_tool_button_new_from_stock(gstring(p_stock_id))))}}}}, nil, nil}}
+}
+
+func (v *ToggleToolButton) OnToggled(onclick interface{}, datas ...interface{}) int {
+	return v.Connect("toggled", onclick, datas...)
+}
+
+func (v *ToggleToolButton) SetActive(is_active bool) {
+	C.gtk_toggle_tool_button_set_active(
+		TOGGLE_TOOL_BUTTON(v), 
+		gbool(is_active)
+	)
+}
+
+func (v *ToggleToolButton) GetActive() bool {
+	return gobool(C.gtk_toggle_tool_button_get_active(TOGGLE_TOOL_BUTTON(v)))
+}
+
+// gtkRadioToolButton
+type RadioToolButton struct {
+	ToggleToolButton
+}
+
+func NewRadioToolButton(group *glib.SList) *RadioToolButton {
+	return &RadioToolButton{ToggleToolButton{ToolButton{ToolItem{Bin{Container{Widget{C.toGWidget(unsafe.Pointer(C.gtk_radio_tool_button_new(gslist(group))))}}}}, nil, nil}}}
+}
+
+func NewRadioToolButtonFromStock(group *glib.SList, stock_id string) *RadioToolButton {
+	p_stock_id := C.CString(stock_id)
+	defer cfree(p_stock_id)
+	return &RadioToolButton{ToggleToolButton{ToolButton{ToolItem{Bin{Container{Widget{C.toGWidget(unsafe.Pointer(C.gtk_radio_tool_button_new_from_stock(gslist(group), gstring(p_stock_id))))}}}}, nil, nil}}}
+}
+
+// gtkFileChooser
+type FileChooserAction int
+
+const (
+	FILE_CHOOSER_ACTION_OPEN          FileChooserAction = 0
+	FILE_CHOOSER_ACTION_SAVE          FileChooserAction = 1
+	FILE_CHOOSER_ACTION_SELECT_FOLDER FileChooserAction = 2
+	FILE_CHOOSER_ACTION_CREATE_FOLDER FileChooserAction = 3
+)
+
+type FileChooser struct {
+	GFileChooser *C.GtkFileChooser
+}
+
+func (v *FileChooser) SetAction(action FileChooserAction) {
+	C.gtk_file_chooser_set_action(
+		v.GFileChooser, 
+		C.GtkFileChooserAction(action)
+	)
+}
+
+func (v *FileChooser) GetAction() FileChooserAction {
+	return FileChooserAction(C.gtk_file_chooser_get_action(v.GFileChooser))
+}
+
+func (v *FileChooser) SetLocalOnly(b bool) {
+	C.gtk_file_chooser_set_local_only(
+		v.GFileChooser, 
+		gbool(b)
+	)
+}
+
+func (v *FileChooser) GetLocalOnly() bool {
+	return gobool(C.gtk_file_chooser_get_local_only(v.GFileChooser))
+}
+
+func (v *FileChooser) GetFilename() string {
+	return gostring(C.gtk_file_chooser_get_filename(v.GFileChooser))
+}
+
+func (v *FileChooser) SetFilename(filename string) {
+	ptr := C.CString(filename)
+	defer cfree(ptr)
+	C.gtk_file_chooser_set_filename(
+		v.GFileChooser, 
+		ptr
+	)
+}
+
+func (v *FileChooser) SetCurrentFolder(f string) bool {
+	cf := C.CString(f)
+	defer cfree(cf)
+	return gobool(C.gtk_file_chooser_set_current_folder(v.GFileChooser, gstring(cf)))
+}
+
+func (v *FileChooser) GetCurrentFolder() string {
+	return gostring(C.gtk_file_chooser_get_current_folder(v.GFileChooser))
+}
+
+func (v *FileChooser) AddFilter(f *FileFilter) {
+	C.gtk_file_chooser_add_filter(
+		v.GFileChooser, 
+		f.GFileFilter
+	)
+}
+
+func (v *FileChooser) RemoveFilter(f *FileFilter) {
+	C.gtk_file_chooser_remove_filter(
+		v.GFileChooser, 
+		f.GFileFilter
+	)
+}
+
+func (v *FileChooser) ListFilters() []*FileFilter {
+	c_list := C.gtk_file_chooser_list_filters(v.GFileChooser)
+	defer C.g_slist_free(c_list)
+	n := int(C.g_slist_length(c_list))
+	ret := make([]*FileFilter, n)
+	for i := 0; i < n; i++ {
+		ret[i] = &FileFilter{C.toGFileFilter(C.g_slist_nth_data(c_list, C.guint(i)))}
+	}
+	return ret
+}
+
+func (v *FileChooser) SetFilter(f *FileFilter) {
+	C.gtk_file_chooser_set_filter(
+		v.GFileChooser, 
+		f.GFileFilter
+	)
+}
+
+func (v *FileChooser) GetFilter() *FileFilter {
+	return &FileFilter{C.gtk_file_chooser_get_filter(v.GFileChooser)}
+}
+
+// gtkFileChooserButton
+type FileChooserButton struct {
+	HBox
+	FileChooser
+}
+
+func NewFileChooserButton(title string, action FileChooserAction) *FileChooserButton {
+	ptitle := C.CString(title)
+	defer cfree(ptitle)
+	w := Widget{C.gtk_file_chooser_button_new(gstring(ptitle), C.GtkFileChooserAction(action))}
+	return &FileChooserButton{HBox{Box{Container{w}}}, FileChooser{FILE_CHOOSER(&w)}}
+}
+
+func NewFileChooserButtonWithDialog(dialog *FileChooserDialog) *FileChooserButton {
+	w := Widget{C.gtk_file_chooser_button_new_with_dialog(dialog.GWidget)}
+	return &FileChooserButton{HBox{Box{Container{w}}}, FileChooser{FILE_CHOOSER(&w)}}
+}
+
+// gtkFileChooserDialog
+type FileChooserDialog struct {
+	Dialog
+	FileChooser
+}
+
+func NewFileChooserDialog(title string, parent *Window, file_chooser_action FileChooserAction,
+	button_text string, button_action ResponseType, buttons ...interface{}) *FileChooserDialog {
+	ptitle := C.CString(title)
+	defer cfree(ptitle)
+	pbutton := C.CString(button_text)
+	defer cfree(pbutton)
+	widget := Widget{
+		C._gtk_file_chooser_dialog_new(
+			gstring(ptitle),
+			ToNative(parent),
+			C.int(file_chooser_action),
+			C.int(button_action),
+			gstring(pbutton)
+		)
+	}
+	ret := &FileChooserDialog{Dialog{Window{Bin{Container{widget}}}, nil}, FileChooser{FILE_CHOOSER(&widget)}}
+	text, res := variadicButtonsToArrays(buttons)
+	for i := range text {
+		ret.AddButton(text[i], res[i])
+	}
+	return ret
+}
+
+// gtkFileChooserWidget
+type FileChooserWidget struct {
+	VBox
+	FileChooser
+}
+
+func NewFileChooserWidget(file_chooser_action FileChooserAction) *FileChooserWidget {
+	widget := Widget{C._gtk_file_chooser_widget_new(C.int(file_chooser_action))}
+	return &FileChooserWidget{VBox{Box{Container{widget}}}, FileChooser{FILE_CHOOSER(&widget)}}
+}
+
+// gtkFileFilter
+type FileFilter struct {
+	GFileFilter *C.GtkFileFilter
+}
+
+func NewFileFilter() *FileFilter {
+	return &FileFilter{C.gtk_file_filter_new()}
+}
+
+func (v *FileFilter) SetName(name string) {
+	ptr := C.CString(name)
+	defer cfree(ptr)
+	C.gtk_file_filter_set_name(
+		v.GFileFilter, 
+		gstring(ptr)
+	)
+}
+
+func (v *FileFilter) GetName() string {
+	return gostring(C.gtk_file_filter_get_name(v.GFileFilter))
+}
+
+func (v *FileFilter) AddMimeType(mimetype string) {
+	ptr := C.CString(mimetype)
+	defer cfree(ptr)
+	C.gtk_file_filter_add_mime_type(
+		v.GFileFilter, 
+		gstring(ptr)
+	)
+}
+
+func (v *FileFilter) AddPattern(pattern string) {
+	ptr := C.CString(pattern)
+	defer cfree(ptr)
+	C.gtk_file_filter_add_pattern(
+		v.GFileFilter, 
+		gstring(ptr)
+	)
+}
+
+// gtkFontButton
+type FontButton struct {
+	Button
+}
+
+func NewFontButton() *FontButton {
+	return &FontButton{Button{Bin{Container{Widget{C.gtk_font_button_new()}}}}}
+}
+
+func NewFontButtonWithFont(fontname string) *FontButton {
+	ptr := C.CString(fontname)
+	defer cfree(ptr)
+	return &FontButton{Button{Bin{Container{Widget{C.gtk_font_button_new_with_font(gstring(ptr))}}}}}
+}
+
+func (v *FontButton) SetFontName(fontname string) {
+	ptr := C.CString(fontname)
+	defer cfree(ptr)
+	C.gtk_font_button_set_font_name(
+		FONT_BUTTON(v), 
+		gstring(ptr)
+	)
+}
+
+func (v *FontButton) GetFontName() string {
+	return gostring(C.gtk_font_button_get_font_name(FONT_BUTTON(v)))
+}
+
+func (v *FontButton) SetShowSize(show_size bool) {
+	C.gtk_font_button_set_show_size(
+		FONT_BUTTON(v), 
+		gbool(show_size)
+	)
+}
+
+func (v *FontButton) GetShowSize() bool {
+	return gobool(C.gtk_font_button_get_show_size(FONT_BUTTON(v)))
+}
+
+func (v *FontButton) SetUseSize(use_size bool) {
+	C.gtk_font_button_set_use_size(
+		FONT_BUTTON(v), 
+		gbool(use_size)
+	)
+}
+
+func (v *FontButton) GetUseSize() bool {
+	return gobool(C.gtk_font_button_get_use_size(FONT_BUTTON(v)))
+}
+
+func (v *FontButton) SetTitle(title string) {
+	ptr := C.CString(title)
+	defer cfree(ptr)
+	C.gtk_font_button_set_title(
+		FONT_BUTTON(v), 
+		gstring(ptr)
+	)
+}
+
+func (v *FontButton) GetTitle() string {
+	return gostring(C.gtk_font_button_get_title(FONT_BUTTON(v)))
+}
+
+// gtkFontSelectionDialog
+type FontSelectionDialog struct {
+	Dialog
+}
+
+func NewFontSelectionDialog(title string) *FontSelectionDialog {
+	ptitle := C.CString(title)
+	defer cfree(ptitle)
+	return &FontSelectionDialog{Dialog{Window{Bin{Container{Widget{C.gtk_font_selection_dialog_new(gstring(ptitle))}}}}, nil}}
+}
+
+func (v *FontSelectionDialog) GetFontName() string {
+	return gostring(C.gtk_font_selection_dialog_get_font_name(FONT_SELECTION_DIALOG(v)))
+}
+
+func (v *FontSelectionDialog) SetFontName(font string) {
+	pfont := C.CString(font)
+	defer cfree(pfont)
+	C.gtk_font_selection_dialog_set_font_name(
+		FONT_SELECTION_DIALOG(v), 
+		gstring(pfont)
+	)
+}
+
+// gtkAlignment
+type Alignment struct {
+	Bin
+}
+
+func NewAlignment(xalign float64, yalign float64, xscale float64, yscale float64) *Alignment {
+	return &Alignment{Bin{Container{Widget{C.gtk_alignment_new(C.gfloat(xalign), C.gfloat(yalign), C.gfloat(xscale), C.gfloat(yscale))}}}}
+}
+
+func (v *Alignment) Set(xalign float64, yalign float64, xscale float64, yscale float64) {
+	C.gtk_alignment_set(
+		ALIGNMENT(v), 
+		C.gfloat(xalign), 
+		C.gfloat(yalign), 
+		C.gfloat(xscale), 
+		C.gfloat(yscale)
+	)
+}
+
+func (v *Alignment) SetPadding(padding_top uint, padding_bottom uint, padding_left uint, padding_right uint) {
+	C.gtk_alignment_set_padding(
+		ALIGNMENT(v), 
+		guint(padding_top), 
+		guint(padding_bottom), 
+		guint(padding_left), 
+		guint(padding_right)
+	)
+}
+
+func (v *Alignment) GetPadding() (padding_top uint, padding_bottom uint, padding_left uint, padding_right uint) {
+	var cpadding_top, cpadding_bottom, cpadding_left, cpadding_right C.guint
+	C.gtk_alignment_get_padding(
+		ALIGNMENT(v), 
+		&cpadding_top, 
+		&cpadding_bottom, 
+		&cpadding_left, 
+		&cpadding_right
+	)
+	padding_top = uint(cpadding_top)
+	padding_bottom = uint(cpadding_bottom)
+	padding_left = uint(cpadding_left)
+	padding_right = uint(cpadding_right)
+	return
+}
+
+// GtkHBox
+type HBox struct {
+	Box
+}
+
+func NewHBox(homogeneous bool, spacing int) *HBox {
+	return &HBox{Box{Container{Widget{C.gtk_hbox_new(gbool(homogeneous), gint(spacing))}}}}
+}
+
+// gtkVBox
+type VBox struct {
+	Box
+}
+
+func NewVBox(homogeneous bool, spacing int) *VBox {
+	return &VBox{Box{Container{Widget{C.gtk_vbox_new(gbool(homogeneous), gint(spacing))}}}}
+}
+
+// gtkFixed
+type Fixed struct {
+	Container
+}
+
+func NewFixed() *Fixed {
+	return &Fixed{Container{Widget{C.gtk_fixed_new()}}}
+}
+
+func (v *Fixed) Put(w IWidget, x, y int) {
+	C.gtk_fixed_put(
+		FIXED(v), 
+		ToNative(w), 
+		gint(x), 
+		gint(y)
+	)
+}
+
+func (v *Fixed) Move(w IWidget, x, y int) {
+	C.gtk_fixed_move(
+		FIXED(v), 
+		ToNative(w), 
+		gint(x), 
+		gint(y)
+	)
+}
+
+// gtkHPaned
+type HPaned struct {
+	Paned
+}
+
+func NewHPaned() *HPaned {
+	return &HPaned{Paned{Container{Widget{C.gtk_hpaned_new()}}}}
+}
+
+// gtkVPaned
+type VPaned struct {
+	Paned
+}
+
+func NewVPaned() *VPaned {
+	return &VPaned{Paned{Container{Widget{C.gtk_vpaned_new()}}}}
+}
+
+// gtkNotebook
+type Notebook struct {
+	Container
+}
+
+func NewNotebook() *Notebook {
+	return &Notebook{Container{Widget{C.gtk_notebook_new()}}}
+}
+
+func (v *Notebook) AppendPage(child IWidget, tab_label IWidget) int {
+	return int(C.gtk_notebook_append_page(NOTEBOOK(v), ToNative(child), ToNative(tab_label)))
+}
+
+func (v *Notebook) AppendPageMenu(child IWidget, tab_label IWidget, menu_label IWidget) int {
+	return int(C.gtk_notebook_append_page_menu(NOTEBOOK(v), ToNative(child), ToNative(tab_label), ToNative(menu_label)))
+}
+
+func (v *Notebook) PrependPage(child IWidget, tab_label IWidget) int {
+	return int(C.gtk_notebook_prepend_page(NOTEBOOK(v), ToNative(child), ToNative(tab_label)))
+}
+
+func (v *Notebook) PrependPageMenu(child IWidget, tab_label IWidget, menu_label IWidget) int {
+	return int(C.gtk_notebook_prepend_page_menu(NOTEBOOK(v), ToNative(child), ToNative(tab_label), ToNative(menu_label)))
+}
+
+func (v *Notebook) InsertPage(child IWidget, tab_label IWidget, position int) int {
+	return int(C.gtk_notebook_insert_page(NOTEBOOK(v), ToNative(child), ToNative(tab_label), gint(position)))
+}
+
+func (v *Notebook) InsertPageMenu(child IWidget, tab_label IWidget, menu_label IWidget, position int) int {
+	return int(C.gtk_notebook_insert_page_menu(NOTEBOOK(v), ToNative(child), ToNative(tab_label), ToNative(menu_label), gint(position)))
+}
+
+func (v *Notebook) RemovePage(child IWidget, page_num int) {
+	C.gtk_notebook_remove_page(
+		NOTEBOOK(v), 
+		gint(page_num)
+	)
+}
+
+func (v *Notebook) PageNum(child IWidget) int {
+	return int(C.gtk_notebook_page_num(NOTEBOOK(v), ToNative(child)))
+}
+
+func (v *Notebook) NextPage() {
+	C.gtk_notebook_next_page(NOTEBOOK(v))
+}
+
+func (v *Notebook) PrevPage() {
+	C.gtk_notebook_prev_page(NOTEBOOK(v))
+}
+
+func (v *Notebook) ReorderChild(child IWidget, position int) {
+	C.gtk_notebook_reorder_child(
+		NOTEBOOK(v), 
+		ToNative(child), 
+		gint(position)
+	)
+}
+
+func (v *Notebook) SetTabPos(pos PositionType) {
+	C.gtk_notebook_set_tab_pos(
+		NOTEBOOK(v), 
+		C.GtkPositionType(pos)
+	)
+}
+
+func (v *Notebook) SetShowTabs(show_tabs bool) {
+	C.gtk_notebook_set_show_tabs(
+		NOTEBOOK(v), 
+		gbool(show_tabs)
+	)
+}
+
+func (v *Notebook) SetShowBorder(show_border bool) {
+	C.gtk_notebook_set_show_border(
+		NOTEBOOK(v), 
+		gbool(show_border)
+	)
+}
+
+func (v *Notebook) SetScrollable(scrollable bool) {
+	C.gtk_notebook_set_scrollable(
+		NOTEBOOK(v), 
+		gbool(scrollable)
+	)
+}
+
+func (v *Notebook) SetTabBorder(border_width uint) {
+	deprecated_since(2, 0, 0, "gtk_notebook_set_tab_border()")
+	C.gtk_notebook_set_tab_border(
+		NOTEBOOK(v), 
+		guint(border_width)
+	)
+}
+
+func (v *Notebook) PopupEnable() {
+	C.gtk_notebook_popup_enable(NOTEBOOK(v))
+}
+
+func (v *Notebook) PopupDisable() {
+	C.gtk_notebook_popup_disable(NOTEBOOK(v))
+}
+
+func (v *Notebook) GetCurrentPage() int {
+	return int(C.gtk_notebook_get_current_page(NOTEBOOK(v)))
+}
+
+func (v *Notebook) GetMenuLabel(child IWidget) *Widget {
+	return &Widget{C.gtk_notebook_get_menu_label(NOTEBOOK(v), ToNative(child))}
+}
+
+func (v *Notebook) GetNthPage(page_num int) *Widget {
+	return &Widget{C.gtk_notebook_get_nth_page(NOTEBOOK(v), gint(page_num))}
+}
+
+func (v *Notebook) GetNPages() int {
+	return int(C.gtk_notebook_get_n_pages(NOTEBOOK(v)))
+}
+
+func (v *Notebook) GetTabLabel(child IWidget) *Widget {
+	return &Widget{C.gtk_notebook_get_tab_label(NOTEBOOK(v), ToNative(child))}
+}
+
+func (v *Notebook) QueryTabLabelPacking(child IWidget, expand *bool, fill *bool, pack_type *uint) {
+	deprecated_since(2, 20, 0, "gtk_notebook_query_tab_label_packing()")
+	var cexpand, cfill C.gboolean
+	var cpack_type C.GtkPackType
+	C.gtk_notebook_query_tab_label_packing(
+		NOTEBOOK(v), 
+		ToNative(child), 
+		&cexpand, 
+		&cfill, 
+		&cpack_type
+	)
+	*expand = gobool(cexpand)
+	*fill = gobool(cfill)
+	*pack_type = uint(cpack_type)
+}
+
+func (v *Notebook) SetHomogeneousTabs(homogeneous bool) {
+	deprecated_since(2, 0, 0, "gtk_notebook_set_homogeneous_tabs()")
+	C.gtk_notebook_set_homogeneous_tabs(
+		NOTEBOOK(v), 
+		gbool(homogeneous)
+	)
+}
+
+func (v *Notebook) SetMenuLabel(child IWidget, menu_label IWidget) {
+	C.gtk_notebook_set_menu_label(
+		NOTEBOOK(v), 
+		ToNative(child), 
+		ToNative(menu_label)
+	)
+}
+
+func (v *Notebook) SetMenuLabelText(child IWidget, name string) {
+	ptr := C.CString(name)
+	defer cfree(ptr)
+	C.gtk_notebook_set_menu_label_text(
+		NOTEBOOK(v), 
+		ToNative(child), 
+		gstring(ptr)
+	)
+}
+
+func (v *Notebook) SetTabHBorder(tab_hborder uint) {
+	deprecated_since(2, 0, 0, "gtk_notebook_set_tab_hborder()")
+	C.gtk_notebook_set_tab_hborder(
+		NOTEBOOK(v), 
+		guint(tab_hborder)
+	)
+}
+
+func (v *Notebook) SetTabLabel(child IWidget, tab_label IWidget) {
+	C.gtk_notebook_set_tab_label(
+		NOTEBOOK(v), 
+		ToNative(child), 
+		ToNative(tab_label)
+	)
+}
+
+func (v *Notebook) SetTabLabelPacking(child IWidget, expand bool, fill bool, pack_type uint) {
+	deprecated_since(2, 20, 0, "gtk_notebook_set_tab_label_packing()")
+	C.gtk_notebook_set_tab_label_packing(
+		NOTEBOOK(v), 
+		ToNative(child), 
+		gbool(expand), 
+		gbool(fill), 
+		C.GtkPackType(pack_type)
+	)
+}
+
+func (v *Notebook) SetTabLabelText(child IWidget, name string) {
+	ptr := C.CString(name)
+	defer cfree(ptr)
+	C.gtk_notebook_set_tab_label_text(
+		NOTEBOOK(v), 
+		ToNative(child), 
+		gstring(ptr)
+	)
+}
+
+func (v *Notebook) SetTabVBorder(tab_vborder uint) {
+	deprecated_since(2, 0, 0, "gtk_notebook_set_tab_vborder()")
+	C.gtk_notebook_set_tab_vborder(
+		NOTEBOOK(v), 
+		guint(tab_vborder)
+	)
+}
+
+func (v *Notebook) SetReorderable(child IWidget, reorderable bool) {
+	C.gtk_notebook_set_tab_reorderable(
+		NOTEBOOK(v), 
+		ToNative(child), 
+		gbool(reorderable)
+	)
+}
+
+func (v *Notebook) SetTabDetachable(child IWidget, detachable bool) {
+	C.gtk_notebook_set_tab_detachable(
+		NOTEBOOK(v), 
+		ToNative(child), 
+		gbool(detachable)
+	)
+}
+
+func (v *Notebook) GetMenuLabelText(child IWidget) string {
+	return gostring(C.gtk_notebook_get_menu_label_text(NOTEBOOK(v), ToNative(child)))
+}
+
+func (v *Notebook) GetScrollable() bool {
+	return gobool(C.gtk_notebook_get_scrollable(NOTEBOOK(v)))
+}
+
+func (v *Notebook) GetShowBorder() bool {
+	return gobool(C.gtk_notebook_get_show_border(NOTEBOOK(v)))
+}
+
+func (v *Notebook) GetShowTabs() bool {
+	return gobool(C.gtk_notebook_get_show_tabs(NOTEBOOK(v)))
+}
+
+func (v *Notebook) GetTabLabelText(child IWidget) string {
+	return gostring(C.gtk_notebook_get_tab_label_text(NOTEBOOK(v), ToNative(child)))
+}
+
+func (v *Notebook) GetTabPos() uint {
+	return uint(C.gtk_notebook_get_tab_pos(NOTEBOOK(v)))
+}
+
+func (v *Notebook) GetTabReorderable(child IWidget) bool {
+	return gobool(C.gtk_notebook_get_tab_reorderable(NOTEBOOK(v), ToNative(child)))
+}
+
+func (v *Notebook) GetTabDetachable(child IWidget) bool {
+	return gobool(C.gtk_notebook_get_tab_detachable(NOTEBOOK(v), ToNative(child)))
+}
+
+func (v *Notebook) SetCurrentPage(pageNum int) {
+	C.gtk_notebook_set_current_page(
+		NOTEBOOK(v), 
+		gint(pageNum)
+	)
+}
+
+func (v *Notebook) SetGroupId(group_id int) {
+	deprecated_since(2, 12, 0, "gtk_notebook_set_group_id()")
+	C.gtk_notebook_set_group_id(
+		NOTEBOOK(v), 
+		gint(group_id)
+	)
+}
+
+func (v *Notebook) GetGroupId() int {
+	deprecated_since(2, 12, 0, "gtk_notebook_get_group_id()")
+	return int(C.gtk_notebook_get_group_id(NOTEBOOK(v)))
+}
+
+func (v *Notebook) SetGroup(group unsafe.Pointer) {
+	deprecated_since(2, 24, 0, "gtk_notebook_set_group()")
+	C.gtk_notebook_set_group(
+		NOTEBOOK(v), 
+		C.gpointer(group)
+	)
+}
+
+func (v *Notebook) GetGroup() unsafe.Pointer {
+	deprecated_since(2, 24, 0, "gtk_notebook_get_group()")
+	return unsafe.Pointer(C.gtk_notebook_get_group(NOTEBOOK(v)))
+}
+
+func (v *Notebook) SetGroupName(group string) {
+	panic_if_version_older(2, 24, 0, "gtk_notebook_set_group_name()")
+	ptr := C.CString(group)
+	defer cfree(ptr)
+	C._gtk_notebook_set_group_name(
+		NOTEBOOK(v), 
+		gstring(ptr)
+	)
+}
+
+func (v *Notebook) GetGroupName() string {
+	panic_if_version_older(2, 24, 0, "gtk_notebook_get_group_name()")
+	return gostring(C._gtk_notebook_get_group_name(NOTEBOOK(v)))
+}
+
+// gtkTable
+type AttachOptions int
+
+const (
+	EXPAND AttachOptions = 1 << 0
+	SHRINK AttachOptions = 1 << 1
+	FILL   AttachOptions = 1 << 2
+)
+
+type Table struct {
+	Container
+}
+
+func NewTable(rows uint, columns uint, homogeneous bool) *Table {
+	return &Table{Container{Widget{C.gtk_table_new(guint(rows), guint(columns), gbool(homogeneous))}}}
+}
+
+func (v *Table) Resize(rows uint, columns uint) {
+	C.gtk_table_resize(
+		TABLE(v), 
+		guint(rows), 
+		guint(columns)
+	)
+}
+
+func (v *Table) Attach(child IWidget, left_attach uint, right_attach uint, top_attach uint, bottom_attach uint, xoptions AttachOptions, yoptions AttachOptions, xpadding uint, ypadding uint) {
+	C.gtk_table_attach(
+		TABLE(v), 
+		ToNative(child), 
+		guint(left_attach), 
+		guint(right_attach), 
+		guint(top_attach), 
+		guint(bottom_attach), 
+		C.GtkAttachOptions(xoptions), 
+		C.GtkAttachOptions(yoptions), 
+		guint(xpadding), 
+		guint(ypadding)
+	)
+}
+
+func (v *Table) AttachDefaults(child IWidget, left_attach uint, right_attach uint, top_attach uint, bottom_attach uint) {
+	C.gtk_table_attach_defaults(
+		TABLE(v), 
+		ToNative(child), 
+		guint(left_attach), 
+		guint(right_attach), 
+		guint(top_attach), 
+		guint(bottom_attach)
+	)
+}
+
+func (v *Table) SetRowSpacing(child IWidget, row uint, spacing uint) {
+	C.gtk_table_set_row_spacing(
+		TABLE(v), 
+		guint(row), 
+		guint(spacing)
+	)
+}
+
+func (v *Table) SetColSpacing(child IWidget, column uint, spacing uint) {
+	C.gtk_table_set_col_spacing(
+		TABLE(v), 
+		guint(column), 
+		guint(spacing)
+	)
+}
+
+func (v *Table) SetRowSpacings(child IWidget, spacing uint) {
+	C.gtk_table_set_row_spacings(
+		TABLE(v), 
+		guint(spacing)
+	)
+}
+
+func (v *Table) SetColSpacings(child IWidget, spacing uint) {
+	C.gtk_table_set_col_spacings(
+		TABLE(v), 
+		guint(spacing)
+	)
+}
+
+func (v *Table) SetHomogeneous(child IWidget, homogeneous bool) {
+	C.gtk_table_set_homogeneous(
+		TABLE(v), 
+		gbool(homogeneous)
+	)
+}
+
+func (v *Table) GetDefaultRowSpacing(child IWidget) uint {
+	return uint(C.gtk_table_get_default_row_spacing(TABLE(v)))
+}
+
+func (v *Table) GetHomogeneous(child IWidget) bool {
+	return gobool(C.gtk_table_get_homogeneous(TABLE(v)))
+}
+
+func (v *Table) GetRowSpacing(child IWidget, row uint) uint {
+	return uint(C.gtk_table_get_row_spacing(TABLE(v), guint(row)))
+}
+
+func (v *Table) GetColSpacing(child IWidget, column uint) uint {
+	return uint(C.gtk_table_get_col_spacing(TABLE(v), guint(column)))
+}
+
+func (v *Table) GetDefaultColSpacing(child IWidget) uint {
+	return uint(C.gtk_table_get_default_col_spacing(TABLE(v)))
+}
+
