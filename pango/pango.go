@@ -1,5 +1,7 @@
 package pango
 
+// #include "pango.go.h"
+// #cgo pkg-config: pango
 import "C"
 
 func bool2gboolean(b bool) C.gboolean {
