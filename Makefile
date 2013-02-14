@@ -5,3 +5,4 @@ install:
 	cd gdk && go install -x
 	cd gdkpixbuf && go install -x
 	cd gtk && go install -x
+	cd gtksourceview && go install -x
