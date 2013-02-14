@@ -27,6 +27,7 @@ func readURL(url string) ([]byte, *http.Response) {
 	return b, r
 }
 
+//Resizing avatar
 func bytes2pixbuf(data []byte, typ string) *gdkpixbuf.Pixbuf {
 	var loader *gdkpixbuf.Loader
 	if strings.Index(typ, "jpeg") >= 0 {
@@ -40,6 +41,7 @@ func bytes2pixbuf(data []byte, typ string) *gdkpixbuf.Pixbuf {
 	return loader.GetPixbuf()
 }
 
+//main func
 func main() {
 	gtk.Init(&os.Args)
 	gdk.ThreadsInit()
