@@ -1,5 +1,5 @@
-#ifndef GTK_GO_H
-#define GTK_GO_H
+#ifndef GO_GTK_H
+#define GO_GTK_H
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
