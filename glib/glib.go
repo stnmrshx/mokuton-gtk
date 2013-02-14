@@ -1,5 +1,7 @@
 package glib
 
+// #include "glib.go.h"
+// #cgo pkg-config: glib-2.0 gobject-2.0
 import "C"
 import "unsafe"
 import "reflect"
@@ -457,9 +459,7 @@ func (v *Error) Message() string {
 }
 
 func ErrorFromNative(err unsafe.Pointer) *Error {
-	return &Error{
-		C.to_error(err)
-	}
+	return &Error{C.to_error(err)}
 }
 
 // GObject Section
@@ -474,9 +474,7 @@ type GObject struct {
 }
 
 func ObjectFromNative(object unsafe.Pointer) *GObject {
-	return &GObject{
-		object
-	}
+	return &GObject{object}
 }
 
 func (v *GObject) Ref() {
@@ -669,6 +667,7 @@ func (c CallbackArg) ToString() string {
 	return C.GoString(C.to_charptr_voidp(unsafe.Pointer(c)))
 }
 
+//export _go_glib_callback
 func _go_glib_callback(cbi *C.callback_info) {
 	context := callback_contexts[int(cbi.func_no)]
 	rf := reflect.ValueOf(context.f)
@@ -734,15 +733,11 @@ type GMainLoop struct {
 }
 
 func NewMainContext() *GMainContext {
-	return &GMainContext{
-		C.g_main_context_new()
-	}
+	return &GMainContext{C.g_main_context_new()}
 }
 
 func (v *GMainContext) Ref() *GMainContext {
-	return &GMainContext{
-		C.g_main_loop_ref(v.MainContext)
-	}
+	return &GMainContext{C.g_main_loop_ref(v.MainContext)}
 }
 
 func (v *GMainContext) Unref() {
@@ -750,9 +745,7 @@ func (v *GMainContext) Unref() {
 }
 
 func MainContextDefault() *GMainContext {
-	return &GMainContext{
-		C.g_main_context_default()
-	}
+	return &GMainContext{C.g_main_context_default()}
 }
 
 func (v *GMainContext) Iteration(blocking bool) bool {
@@ -772,9 +765,7 @@ func NewMainLoop(context *GMainContext, is_running bool) *GMainLoop {
 }
 
 func (v *GMainLoop) Ref() *GMainLoop {
-	return &GMainLoop{
-		C.g_main_loop_ref(v.MainLoop)
-	}
+	return &GMainLoop{C.g_main_loop_ref(v.MainLoop)}
 }
 
 func (v *GMainLoop) Unref() {
@@ -794,9 +785,7 @@ func (v *GMainLoop) IsRunning() bool {
 }
 
 func (v *GMainLoop) GetContext() *GMainContext {
-	return &GMainContext{
-		C.g_main_loop_get_context(v.MainLoop)
-	}
+	return &GMainContext{C.g_main_loop_get_context(v.MainLoop)}
 }
 
 type SourcefuncContext struct {
@@ -805,6 +794,7 @@ type SourcefuncContext struct {
 	data reflect.Value
 }
 
+//export _go_glib_sourcefunc
 func _go_glib_sourcefunc(sfi *C.sourcefunc_info) {
 	context := sourcefunc_contexts[int(sfi.func_no)]
 	rf := reflect.ValueOf(context.f)

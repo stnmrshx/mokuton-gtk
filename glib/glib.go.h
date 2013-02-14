@@ -1,5 +1,5 @@
-#ifndef GLIB_GO_H
-#define GLIB_GO_H
+#ifndef GO_GLIB_H
+#define GO_GLIB_H
 
 #include <glib.h>
 #include <glib-object.h>
