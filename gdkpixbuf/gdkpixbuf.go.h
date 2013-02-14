@@ -1,5 +1,5 @@
-#ifndef GDK_PIXBUF_GO_H
-#define GDK_PIXBUF_GO_H
+#ifndef GO_GDK_PIXBUF_H
+#define GO_GDK_PIXBUF_H
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <unistd.h>
@@ -7,10 +7,6 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
-
-static const gchar* to_gcharptr(const char* s) { 
-	return (const gchar*)s; 
-}
 
 static guchar* to_gucharptr(void* s) { 
 	return (guchar*)s; 
