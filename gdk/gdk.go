@@ -1,14 +1,16 @@
 package gdk
 
+// #include "gdk.go.h"
+// #cgo pkg-config: gdk-2.0 gthread-2.0
 import "C"
 import "unsafe"
 
 func gint(v int) C.gint {
-	return C.gint(v) 
+	return C.gint(v)
 }
 
-func gstring(s *C.char) *C.gchar { 
-	return C.toGstr(s) 
+func gstring(s *C.char) *C.gchar {
+	return C.toGstr(s)
 }
 
 func gbool(b bool) C.gboolean {
@@ -25,8 +27,8 @@ func gobool(b C.gboolean) bool {
 	return false
 }
 
-func cfree(s *C.char) { 
-	C.freeCstr(s) 
+func cfree(s *C.char) {
+	C.freeCstr(s)
 }
 
 // types extensible declare runtime
@@ -161,9 +163,7 @@ type Cursor struct {
 }
 
 func NewCursor(cursor_type CursorType) *Cursor {
-	return &Cursor{
-		C.gdk_cursor_new(C.GdkCursorType(cursor_type))
-	}
+	return &Cursor{C.gdk_cursor_new(C.GdkCursorType(cursor_type))}
 }
 
 // gdkColor contains the values of a color that may or may not be allocated
@@ -176,9 +176,7 @@ func NewColor(name string) *Color {
 	ptr := C.CString(name)
 	defer cfree(ptr)
 	C.gdk_color_parse(gstring(ptr), &color)
-	return &Color{
-		color
-	}
+	return &Color{color}
 }
 
 // gdkFont
@@ -189,17 +187,13 @@ type Font struct {
 func FontLoad(name string) *Font {
 	ptr := C.CString(name)
 	defer cfree(ptr)
-	return &Font{
-		C.gdk_font_load(gstring(ptr))
-	}
+	return &Font{C.gdk_font_load(gstring(ptr))}
 }
 
 func FontsetLoad(name string) *Font {
 	ptr := C.CString(name)
 	defer cfree(ptr)
-	return &Font{
-		C.gdk_fontset_load(gstring(ptr))
-	}
+	return &Font{C.gdk_fontset_load(gstring(ptr))}
 }
 
 // gdkGC graphic content and treat it as arg
@@ -208,9 +202,7 @@ type GC struct {
 }
 
 func NewGC(drawable *Drawable) *GC {
-	return &GC{
-		C.gdk_gc_new(drawable.GDrawable)
-	}
+	return &GC{C.gdk_gc_new(drawable.GDrawable)}
 }
 
 func (v *GC) SetForeground(color *Color) {
@@ -264,23 +256,23 @@ func (v *Drawable) DrawDrawable(gc *GC, src *Drawable, xsrc int, ysrc int, xdest
 type ModifierType int //and it always int
 
 const (
-	SHIFT_MASK   ModifierType = 1 << 0
-	LOCK_MASK    ModifierType = 1 << 1
-	CONTROL_MASK ModifierType = 1 << 2
-	MOD1_MASK    ModifierType = 1 << 3
-	MOD2_MASK    ModifierType = 1 << 4
-	MOD3_MASK    ModifierType = 1 << 5
-	MOD4_MASK    ModifierType = 1 << 6
-	MOD5_MASK    ModifierType = 1 << 7
-	BUTTON1_MASK ModifierType = 1 << 8
-	BUTTON2_MASK ModifierType = 1 << 9
-	BUTTON3_MASK ModifierType = 1 << 10
-	BUTTON4_MASK ModifierType = 1 << 11
-	BUTTON5_MASK ModifierType = 1 << 12
-	SUPER_MASK ModifierType = 1 << 26
-	HYPER_MASK ModifierType = 1 << 27
-	META_MASK  ModifierType = 1 << 28
-	RELEASE_MASK ModifierType = 1 << 30
+	SHIFT_MASK    ModifierType = 1 << 0
+	LOCK_MASK     ModifierType = 1 << 1
+	CONTROL_MASK  ModifierType = 1 << 2
+	MOD1_MASK     ModifierType = 1 << 3
+	MOD2_MASK     ModifierType = 1 << 4
+	MOD3_MASK     ModifierType = 1 << 5
+	MOD4_MASK     ModifierType = 1 << 6
+	MOD5_MASK     ModifierType = 1 << 7
+	BUTTON1_MASK  ModifierType = 1 << 8
+	BUTTON2_MASK  ModifierType = 1 << 9
+	BUTTON3_MASK  ModifierType = 1 << 10
+	BUTTON4_MASK  ModifierType = 1 << 11
+	BUTTON5_MASK  ModifierType = 1 << 12
+	SUPER_MASK    ModifierType = 1 << 26
+	HYPER_MASK    ModifierType = 1 << 27
+	META_MASK     ModifierType = 1 << 28
+	RELEASE_MASK  ModifierType = 1 << 30
 	MODIFIER_MASK ModifierType = 0x5c001fff
 )
 
@@ -390,17 +382,13 @@ type Window struct {
 }
 
 func WindowFromUnsafe(window unsafe.Pointer) *Window {
-	return &Window{
-		C.toGdkWindow(window)
-	}
+	return &Window{C.toGdkWindow(window)}
 }
 
 func (v *Window) GetPointer(x *int, y *int, mask *ModifierType) *Window {
 	var cx, cy C.gint
 	var mt C.GdkModifierType
-	ret := &Window{
-		C.gdk_window_get_pointer(v.GWindow, &cx, &cy, &mt)
-	}
+	ret := &Window{C.gdk_window_get_pointer(v.GWindow, &cx, &cy, &mt)}
 	*x = int(cx)
 	*y = int(cy)
 	*mask = ModifierType(mt)
@@ -408,9 +396,7 @@ func (v *Window) GetPointer(x *int, y *int, mask *ModifierType) *Window {
 }
 
 func (v *Window) GetDrawable() *Drawable {
-	return &Drawable{
-		(*C.GdkDrawable)(v.GWindow)
-	}
+	return &Drawable{(*C.GdkDrawable)(v.GWindow)}
 }
 
 func (v *Window) Invalidate(rect *Rectangle, invalidate_children bool) {
@@ -440,14 +426,7 @@ type Pixmap struct {
 }
 
 func NewPixmap(drawable *Drawable, width int, height int, depth int) *Pixmap {
-	return &Pixmap{
-		C.gdk_pixmap_new(
-			drawable.GDrawable, 
-			gint(width), 
-			gint(height), 
-			gint(depth)
-		)
-	}
+	return &Pixmap{C.gdk_pixmap_new(drawable.GDrawable, gint(width), gint(height), gint(depth))}
 }
 
 func (v *Pixmap) Ref() {
@@ -459,9 +438,7 @@ func (v *Pixmap) Unref() {
 }
 
 func (v *Pixmap) GetDrawable() *Drawable {
-	return &Drawable{
-		(*C.GdkDrawable)(v.GPixmap)
-	}
+	return &Drawable{(*C.GdkDrawable)(v.GPixmap)}
 }
 
 //based on gtk.gdk.py const key :-"
@@ -2792,7 +2769,5 @@ type Display struct {
 }
 
 func DisplayGetDefault() *Display {
-	return &Display{
-		C._gdk_display_get_default()
-	}
+	return &Display{C._gdk_display_get_default()}
 }

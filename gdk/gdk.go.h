@@ -1,5 +1,5 @@
-#ifndef GDK_GO_H
-#define GDK_GO_H
+#ifndef GO_GDK_H
+#define GO_GDK_H
 
 #include <gdk/gdk.h>
 #include <unistd.h>
