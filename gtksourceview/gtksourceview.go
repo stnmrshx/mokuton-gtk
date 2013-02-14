@@ -1,19 +1,21 @@
 package gtksourceview
 
+// #include "gtksourceview.go.h"
+// #cgo pkg-config: gtksourceview-2.0
 import "C"
 import "github.com/stnmrshx/mokuton-gtk/gtk"
 import "unsafe"
 
-func gstring(s *C.char) *C.gchar { 
-	return C.toGstr(s) 
+func gstring(s *C.char) *C.gchar {
+	return C.toGstr(s)
 }
 
-func cstring(s *C.gchar) *C.char { 
-	return C.toCstr(s) 
+func cstring(s *C.gchar) *C.char {
+	return C.toCstr(s)
 }
 
-func gostring(s *C.gchar) string { 
-	return C.GoString(cstring(s)) 
+func gostring(s *C.gchar) string {
+	return C.GoString(cstring(s))
 }
 
 func gbool(b bool) C.gboolean {
@@ -30,8 +32,8 @@ func gobool(b C.gboolean) bool {
 	return false
 }
 
-func cfree(s *C.char) { 
-	C.freeCstr(s) 
+func cfree(s *C.char) {
+	C.freeCstr(s)
 }
 
 // gtkSourceBuffer object, model for gtksourceview widget
@@ -42,16 +44,12 @@ type SourceBuffer struct {
 
 func NewSourceBuffer() *SourceBuffer {
 	v := C.gtk_source_buffer_new(nil)
-	return &SourceBuffer{
-		v, gtk.NewTextBufferFromPointer(unsafe.Pointer(v))
-	}
+	return &SourceBuffer{v, gtk.NewTextBufferFromPointer(unsafe.Pointer(v))}
 }
 
 func NewSourceBufferWithLanguage(lang *SourceLanguage) *SourceBuffer {
 	v := C.gtk_source_buffer_new_with_language(lang.GSourceLanguage)
-	return &SourceBuffer{
-		v, gtk.NewTextBufferFromPointer(unsafe.Pointer(v))
-	}
+	return &SourceBuffer{v, gtk.NewTextBufferFromPointer(unsafe.Pointer(v))}
 }
 
 func (v *SourceBuffer) GetNativeBuffer() unsafe.Pointer {
@@ -71,9 +69,7 @@ func (v *SourceBuffer) SetLanguage(lang *SourceLanguage) {
 }
 
 func (v *SourceBuffer) GetLanguage() *SourceLanguage {
-	return &SourceLanguage{
-		C.gtk_source_buffer_get_language(v.GSourceBuffer)
-	}
+	return &SourceLanguage{C.gtk_source_buffer_get_language(v.GSourceBuffer)}
 }
 
 func (v *SourceBuffer) BeginNotUndoableAction() {
@@ -90,23 +86,11 @@ type SourceView struct {
 }
 
 func NewSourceView() *SourceView {
-	return &SourceView{
-		gtk.TextView{
-			gtk.Container{
-				*gtk.WidgetFromNative(unsafe.Pointer(C.gtk_source_view_new()))
-			}
-		}
-	}
+	return &SourceView{gtk.TextView{gtk.Container{*gtk.WidgetFromNative(unsafe.Pointer(C.gtk_source_view_new()))}}}
 }
 
 func NewSourceViewWithBuffer(buf *SourceBuffer) *SourceView {
-	return &SourceView{
-		gtk.TextView{
-			gtk.Container{
-				*gtk.WidgetFromNative(unsafe.Pointer(C.gtk_source_view_new_with_buffer(buf.GSourceBuffer)))
-			}
-		}
-	}
+	return &SourceView{gtk.TextView{gtk.Container{*gtk.WidgetFromNative(unsafe.Pointer(C.gtk_source_view_new_with_buffer(buf.GSourceBuffer)))}}}
 }
 
 func (v *SourceView) ToNativeSourceView() *C.GtkSourceView {
@@ -295,15 +279,11 @@ type SourceLanguageManager struct {
 }
 
 func NewSourceLanguageManager() *SourceLanguageManager {
-	return &SourceLanguageManager{
-		C.gtk_source_language_manager_new()
-	}
+	return &SourceLanguageManager{C.gtk_source_language_manager_new()}
 }
 
 func SourceLanguageManagerGetDefault() *SourceLanguageManager {
-	return &SourceLanguageManager{
-		C.gtk_source_language_manager_get_default()
-	}
+	return &SourceLanguageManager{C.gtk_source_language_manager_get_default()}
 }
 
 func (v *SourceLanguageManager) SetSearchPath(paths []string) {
@@ -347,22 +327,16 @@ func (v *SourceLanguageManager) GetLanguageIds() []string {
 func (v *SourceLanguageManager) GetLanguage(id string) *SourceLanguage {
 	cid := C.CString(id)
 	defer cfree(cid)
-	return &SourceLanguage{
-		C.gtk_source_language_manager_get_language(v.GSourceLanguageManager, gstring(cid))
-	}
+	return &SourceLanguage{C.gtk_source_language_manager_get_language(v.GSourceLanguageManager, gstring(cid))}
 }
 
 func (v *SourceLanguageManager) GuessLanguage(filename string, contentType string) *SourceLanguage {
 	if filename == "" {
 		cct := C.CString(contentType)
 		defer cfree(cct)
-		return &SourceLanguage{
-			C.gtk_source_language_manager_guess_language(v.GSourceLanguageManager, nil, gstring(cct))
-		}
+		return &SourceLanguage{C.gtk_source_language_manager_guess_language(v.GSourceLanguageManager, nil, gstring(cct))}
 	}
 	cfn := C.CString(filename)
 	defer cfree(cfn)
-	return &SourceLanguage{
-		C.gtk_source_language_manager_guess_language(v.GSourceLanguageManager, gstring(cfn), nil)
-	}
+	return &SourceLanguage{C.gtk_source_language_manager_guess_language(v.GSourceLanguageManager, gstring(cfn), nil)}
 }

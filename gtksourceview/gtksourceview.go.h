@@ -1,5 +1,5 @@
-#ifndef GTKSOURCEVIEW_GO_H
-#define GTKSOURCEVIEW_GO_H
+#ifndef GO_GTKSOURCEVIEW_H
+#define GO_GTKSOURCEVIEW_H
 
 #include <gtksourceview/gtksourceview.h>
 #include <gtksourceview/gtksourcebuffer.h>
